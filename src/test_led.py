@@ -1,16 +1,23 @@
-# test_led.py
 import RPi.GPIO as GPIO
 import time
-from sensors.led_bar_controller import LedBar
+
+LED_PIN = 16  # tu pin PWM donde está conectada la LED bar
 
 GPIO.setmode(GPIO.BCM)
-led = LedBar(pin=16)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+# Crear PWM
+pwm = GPIO.PWM(LED_PIN, 1000)  # frecuencia 1kHz
+pwm.start(0)  # brillo inicial 0%
 
 try:
-    for level in [0, 30, 60, 100, 0]:
-        led.pwm.ChangeDutyCycle(level)
-        print("Brillo:", level)
+    # Probar varios niveles de brillo
+    for duty in [0, 30, 60, 100, 0]:
+        pwm.ChangeDutyCycle(duty)
+        print("Brillo:", duty)
         time.sleep(1)
+
 finally:
-    led.cleanup()
+    pwm.stop()
     GPIO.cleanup()
+    print("GPIO limpiado, prueba terminada")
