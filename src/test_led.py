@@ -1,15 +1,16 @@
-# test_noise.py
+# test_led.py
 import RPi.GPIO as GPIO
 import time
-from sensors.noise_sensor import NoiseSensor
+from sensors.led_bar_controller import LedBar
 
 GPIO.setmode(GPIO.BCM)
-sensor = NoiseSensor(pin=18)
+led = LedBar(pin=16)
 
 try:
-    while True:
-        noise = sensor.read_noise_level()
-        print("Noise level:", noise)
-        time.sleep(0.5)
+    for level in [0, 30, 60, 100, 0]:
+        led.pwm.ChangeDutyCycle(level)
+        print("Brillo:", level)
+        time.sleep(1)
 finally:
+    led.cleanup()
     GPIO.cleanup()
