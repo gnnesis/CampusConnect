@@ -1,18 +1,16 @@
-# noise_sensor.py
 import RPi.GPIO as GPIO
 
 class NoiseSensor:
     def __init__(self, pin=18):
         self.pin = pin
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.IN)
-
-    def read_noise_level(self):
+    
+    def read_noise(self):
         """
-        Retorna nivel de ruido simulado o real
-        Digital: 0 = silencio, 1 = ruido alto
+        Devuelve True si hay ruido, False si poco ruido.
         """
-        value = GPIO.input(self.pin)
-        if value == 0:
-            return 30  # silencioso
-        else:
-            return 70  # ruido alto
+        return GPIO.input(self.pin)
+    
+    def cleanup(self):
+        GPIO.cleanup()
