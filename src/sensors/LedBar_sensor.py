@@ -1,4 +1,4 @@
-# led_bar_controller.py
+# sensors/led_bar_controller.py
 import RPi.GPIO as GPIO
 
 class LedBar:
@@ -10,20 +10,11 @@ class LedBar:
 
     def update(self, noise_level):
         """
-        Ajusta brillo según ruido
+        Ajusta brillo de la LED bar según el nivel de ruido
         """
         if noise_level < 40:
             duty_cycle = 30
             level = "Low"
         elif noise_level < 60:
             duty_cycle = 60
-            level = "Medium"
-        else:
-            duty_cycle = 100
-            level = "High"
-
-        self.pwm.ChangeDutyCycle(duty_cycle)
-        print(f"Noise: {noise_level} dB → LED bar: {level}, Brightness: {duty_cycle}%")
-
-    def cleanup(self):
-        self.pwm.stop()
+            level = "Medi

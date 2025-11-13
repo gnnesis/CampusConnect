@@ -7,8 +7,8 @@ from sensors.led_bar_controller import LedBar
 GPIO.setmode(GPIO.BCM)
 
 # Crear instancias
-noise_sensor = NoiseSensor(pin=18)
-led_bar = LedBar(pin=16)
+noise_sensor = NoiseSensor(pin=18)  # Sensor de ruido
+led_bar = LedBar(pin=16)             # LED bar
 
 try:
     while True:
