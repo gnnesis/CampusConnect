@@ -1,14 +1,17 @@
 import time
-from display.lcd_display import LCDDisplay
+from RPLCD.i2c import CharLCD
 
-lcd = LCDDisplay(i2c_address=0x27)
+# Configuración de la pantalla Grove 16x2 LCD
+lcd = CharLCD('PCF8574', 0x27, cols=16, rows=2)  # dirección I2C común: 0x27
 
 try:
     messages = ["Hola!", "Poco ruido :)", "Ruido alto!"]
     while True:
         for msg in messages:
-            lcd.show_message(msg)
+            lcd.clear()          # limpiar pantalla antes de escribir
+            lcd.write_string(msg)  # mostrar mensaje
             time.sleep(2)
+
 except KeyboardInterrupt:
-    lcd.clear()
+    lcd.clear()  # limpiar pantalla al salir
     print("Prueba terminada")
