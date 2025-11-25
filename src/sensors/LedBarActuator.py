@@ -1,5 +1,5 @@
 from grove.grove_ledbar import GroveLedBar
-ledBar = GroveLedBar(5,6)
+ledBar = GroveLedBar(22,0)
 
 def showStatus(colour):
 	if colour == "green":

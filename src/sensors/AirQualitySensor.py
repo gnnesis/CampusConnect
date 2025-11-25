@@ -2,7 +2,7 @@ from grove.adc import ADC
 adc = ADC()
 
 def readAirQuality():
-	return adc.read(0)
+	return adc.read(2)
 
 def airQuality():
 	value = readAirQuality()
