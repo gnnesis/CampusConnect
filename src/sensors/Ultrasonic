@@ -1,0 +1,8 @@
+from grove.grove_ultrasonic_ranger import GroveUltrasonicRanger
+ultrasonic = GroveUltrasonicRanger(6)
+
+def distance():
+	return ultrasonic.get_distance()
+
+def arePeople():
+	return distance() < 80
