@@ -1,4 +1,8 @@
 import time
+from TemperatureHumiditySensor import readTemperatureHumidity
+from NoiseSensor import readNoise
+from AirQualitySensor import readAirQuality
+from UltrasonicSensor import arePeople
 
 while True:
 	temp, hum = readTemperatureHumidity()
