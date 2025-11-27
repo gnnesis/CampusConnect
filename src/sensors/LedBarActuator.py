@@ -6,5 +6,5 @@ def showStatus(colour):
 		ledBar.set_level(3)
 	elif colour == "yellow":
 		ledBar.set_level(6)
-	elif colour == "green":
+	elif colour == "red":
 		lebBar.set_level(10)
