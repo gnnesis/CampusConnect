@@ -25,6 +25,6 @@ while True:
 	else:
 		showStatus("Green")
 
-	updateLcd(f"T: {temp:.1f}C R: {noise}", f"air: {airStatus}")
+	updateLcd(f"T: {temp:.1f}C", f"H: {hum:.1f}%")
 
 	time.sleep(1)
