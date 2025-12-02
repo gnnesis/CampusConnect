@@ -6,25 +6,25 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sensors'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'display'))
 
 from TemperatureHumiditySensor import readTemperatureHumidity
-from NoiseSensor import readNoise
-from AirQualitySensor import readAirQuality
+from NoiseSensor import noiseLevel
+from AirQualitySensor import airQuality
 from UltrasonicSensor import arePeople
 from LedBarActuator import showStatus
 from LcdDisplay import updateLcd
 
 while True:
 	temp, hum = readTemperatureHumidity()
-	noise = readNoise()
-	airQuality = readAirQuality()
+	noise = noiseLevel()
+	airStatus = airQuality()
 	people = arePeople()
 
-	if airQuality == "Bad" or noise == "High" or people:
+	if airStatus == "Bad" or noise == "High" or people:
 		showStatus("Red")
-	elif airQuality == "Medium" or noise == "Regular":
+	elif airStatus == "Medium" or noise == "Regular":
 		showStatus("Yellow")
 	else:
 		showStatus("Green")
 
-	updateLcd(f"T: {temp:.1f}ºC R: {noise}", f"air: {airQuality}")
+	updateLcd(f"T: {temp:.1f}C R: {noise}", f"air: {airStatus}")
 
 	time.sleep(1)
