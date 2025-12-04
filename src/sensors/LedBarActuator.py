@@ -31,7 +31,6 @@ class MY9221:
     
     def set_level(self, level):
         self.send_16bit(0x0000)
-        
         for i in range(10):
             if i < level:
                 self.send_16bit(0x00FF)
@@ -42,10 +41,12 @@ class MY9221:
 
 ledBar = MY9221(22, 23)
 
-def showStatus(colour):
-    if colour == "green":
+def showNoiseLevel(noise_status):
+    if noise_status == "Low":
         ledBar.set_level(3)
-    elif colour == "yellow":
-        ledBar.set_level(6)
-    elif colour == "red":
-        ledBar.set_level(10)
+    elif noise_status == "Medium":
+        ledBar.set_level(6)  
+    elif noise_status == "High":
+        ledBar.set_level(10) 
+    else:
+        ledBar.set_level(0) 
