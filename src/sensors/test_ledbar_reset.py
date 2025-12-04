@@ -1,11 +1,10 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sensors'))
-
 import RPi.GPIO as GPIO
 import time
+from grove.adc import ADC
 
-# Configuración
+# --------------------------
+# CONFIGURACION DE PINES
+# --------------------------
 DATA_PIN = 22
 CLOCK_PIN = 23
 
@@ -14,9 +13,14 @@ GPIO.setwarnings(False)
 GPIO.setup(DATA_PIN, GPIO.OUT)
 GPIO.setup(CLOCK_PIN, GPIO.OUT)
 
-def send_16bit(data):
-    for i in range(16):
-        bit = 1 if (data & 0x8000) else 0
+# --------------------------
+# FUNCIONES PARA EL LED BAR
+# --------------------------
+
+# Enviar 8 bits al LED Bar (protocolo correcto)
+def send_8bit(data):
+    for i in range(8):
+        bit = 1 if (data & 0x80) else 0
         GPIO.output(DATA_PIN, bit)
         GPIO.output(CLOCK_PIN, GPIO.LOW)
         time.sleep(0.00001)
@@ -24,6 +28,7 @@ def send_16bit(data):
         time.sleep(0.00001)
         data <<= 1
 
+# Latch necesario para que el LED Bar actualice la salida
 def latch():
     GPIO.output(DATA_PIN, GPIO.LOW)
     time.sleep(0.0001)
@@ -33,30 +38,75 @@ def latch():
         GPIO.output(DATA_PIN, GPIO.LOW)
         time.sleep(0.00001)
 
-print("Apagando todos los LEDs...")
-send_16bit(0x0000)
-for i in range(10):
-    send_16bit(0x0000)
-latch()
-time.sleep(2)
+# Comando del LED Bar
+CMD_MODE = 0x00  # establecer niveles manualmente
 
-print("Test: Encendiendo LEDs uno por uno...")
-for level in range(1, 11):
-    print(f"Encendiendo {level} LED(s)")
-    send_16bit(0x0000)
+
+# --------------------------
+# FUNCIONES LED BAR
+# --------------------------
+
+def clear_bar():
+    send_8bit(CMD_MODE)
+    for _ in range(10):
+        send_8bit(0x00)
+    latch()
+
+def set_bar_level(level):
+    send_8bit(CMD_MODE)
     for i in range(10):
         if i < level:
-            send_16bit(0xFFFF)
+            send_8bit(0x01)  # encender solo 1 LED por nivel
         else:
-            send_16bit(0x0000)
+            send_8bit(0x00)
     latch()
-    time.sleep(1)
 
-print("Apagando todo...")
-send_16bit(0x0000)
-for i in range(10):
-    send_16bit(0x0000)
-latch()
+# --------------------------
+# SENSOR DE RUIDO
+# --------------------------
+
+adc = ADC()
+
+def readNoise():
+    return adc.read(4)
+
+def noiseLevel():
+    value = readNoise()
+    if value < 100:
+        return "Low"
+    elif value < 350:
+        return "Medium"
+    else:
+        return "High"
+
+# --------------------------
+# TESTS DEL LED BAR
+# --------------------------
+
+print("Apagando todos los LEDs...")
+clear_bar()
+time.sleep(1)
+
+print("Test 1: Encendiendo LEDs uno por uno...")
+for i in range(1, 11):
+    print(f" Encendiendo LED {i}")
+    set_bar_level(i)
+    time.sleep(0.5)
+
+print("Test 2: Barra VU-Meter (crecimiento)...")
+for i in range(0, 11):
+    value = (1 << i) - 1  # 1, 3, 7, 15... estilo barra
+    send_8bit(CMD_MODE)
+    for n in range(10):
+        if n < i:
+            send_8bit(value & 0xFF)
+        else:
+            send_8bit(0x00)
+    latch()
+    time.sleep(0.5)
+
+print("Apagando...")
+clear_bar()
 
 GPIO.cleanup()
-print("Test completado")
+print("Test completado.")
