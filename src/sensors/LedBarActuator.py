@@ -5,6 +5,7 @@ class MY9221:
     def __init__(self, data_pin, clock_pin):
         self.data_pin = data_pin
         self.clock_pin = clock_pin
+        self.current_level = -1  # Nivel actual de LEDs
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         GPIO.setup(self.data_pin, GPIO.OUT)
@@ -32,31 +33,30 @@ class MY9221:
             time.sleep(0.00001)
 
     def clear_all(self):
-        for i in range(10):
+        for _ in range(10):
             self.send_16bit(0x0000)
         self.latch_data()
 
-    def set_level_color(self, level, color):
+    def set_level(self, level):
         """
-        level: cantidad de LEDs a encender
-        color: 'green', 'yellow', 'red'
+        Enciende los primeros 'level' LEDs y mantiene el resto apagados.
+        Solo actualiza si el nivel cambia.
         """
-        self.clear_all()
-        time.sleep(0.05)
+        if level == self.current_level:
+            return  # No hacer nada si no cambia
 
+        # Apagar todos brevemente
+        self.clear_all()
+        time.sleep(0.1)
+
+        # Encender los primeros 'level' LEDs
         for i in range(10):
-            # Mapear LEDs físicos: 0=rojo, 1=amarillo, 2-9=verdes
-            if color == 'green' and i >= 2 and i < 2 + level:
+            if i < level:
                 self.send_16bit(0xFFFF)
-            elif color == 'yellow' and i == 1 and level >= 1:
-                self.send_16bit(0xFFFF)
-                level -= 1
-            elif color == 'red' and i == 0 and level >= 1:
-                self.send_16bit(0xFFFF)
-                level -= 1
             else:
                 self.send_16bit(0x0000)
         self.latch_data()
+        self.current_level = level
 
 
 # Crear instancia de la barra LED
@@ -64,20 +64,16 @@ ledBar = MY9221(22, 23)
 
 def showNoiseLevel(noise_status):
     """
-    Muestra el nivel de ruido en la barra LED con colores:
-    Low: 3 LEDs verdes
-    Medium: 6 LEDs amarillos
-    High: 10 LEDs (1 rojo + resto verde)
+    Actualiza la barra LED según el nivel de ruido:
+    Low: 3 LEDs
+    Medium: 6 LEDs
+    High: 10 LEDs
     """
     if noise_status == "Low":
-        # 3 LEDs verdes (LEDs 3,4,5)
-        ledBar.set_level_color(3, 'green')
+        ledBar.set_level(3)
     elif noise_status == "Medium":
-        # 6 LEDs: amarillo + verdes
-        # LED 2 amarillo + 5 LEDs verdes
-        ledBar.set_level_color(6, 'yellow')
+        ledBar.set_level(6)
     elif noise_status == "High":
-        # 10 LEDs: rojo + verdes
-        ledBar.set_level_color(10, 'red')
+        ledBar.set_level(10)
     else:
-        ledBar.clear_all()
+        ledBar.set_level(0)
