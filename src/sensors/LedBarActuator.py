@@ -17,18 +17,15 @@ class MY9221:
         for i in range(16):
             bit = 1 if (data & 0x8000) else 0
             GPIO.output(self.data_pin, bit)
-
             GPIO.output(self.clock_pin, GPIO.LOW)
             time.sleep(0.00001)
             GPIO.output(self.clock_pin, GPIO.HIGH)
             time.sleep(0.00001)
-
             data <<= 1
     
     def latch_data(self):
         GPIO.output(self.data_pin, GPIO.LOW)
         time.sleep(0.0001)
-        
         for i in range(8):
             GPIO.output(self.data_pin, GPIO.HIGH)
             time.sleep(0.00001)
@@ -42,24 +39,24 @@ class MY9221:
         self.latch_data()
     
     def set_level(self, level):
+        # Evitar sobreposición
         if level == self.current_level:
             return
-        
         self.clear_all()
         time.sleep(0.05)
-        
         self.send_16bit(0x0000)
-        
         for i in range(10):
             if i < level:
                 self.send_16bit(0xFFFF)
             else:
                 self.send_16bit(0x0000)
-        
         self.latch_data()
+        self.current_level = level
 
+# Crear instancia
 ledBar = MY9221(22, 23)
 
+# Función para mostrar el nivel de ruido
 def showNoiseLevel(noise_status):
     if noise_status == "Low":
         ledBar.set_level(3)

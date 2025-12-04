@@ -8,7 +8,7 @@ def noiseLevel():
 	value = readNoise()
 	if value < 100:
 		return "Low"
-	elif value >= 100 and value < 350:
+	elif value < 350:
 		return "Medium"
 	else:
 		return "High"
