@@ -13,20 +13,21 @@ class MY9221:
         GPIO.output(self.data_pin, GPIO.LOW)
         GPIO.output(self.clock_pin, GPIO.LOW)
 
-    def send_16bit(self, data):
-        for i in range(16):
-            bit = 1 if (data & 0x8000) else 0
-            GPIO.output(self.data_pin, bit)
-            GPIO.output(self.clock_pin, GPIO.LOW)
-            time.sleep(0.00001)
-            GPIO.output(self.clock_pin, GPIO.HIGH)
-            time.sleep(0.00001)
-            data <<= 1
+    def send_16bit(self, bit_on):
+        """
+        Envia un solo bit a la barra.
+        bit_on: True para encender, False para apagar
+        """
+        GPIO.output(self.data_pin, GPIO.HIGH if bit_on else GPIO.LOW)
+        GPIO.output(self.clock_pin, GPIO.LOW)
+        time.sleep(0.00001)
+        GPIO.output(self.clock_pin, GPIO.HIGH)
+        time.sleep(0.00001)
 
     def latch_data(self):
         GPIO.output(self.data_pin, GPIO.LOW)
         time.sleep(0.0001)
-        for i in range(8):
+        for _ in range(8):
             GPIO.output(self.data_pin, GPIO.HIGH)
             time.sleep(0.00001)
             GPIO.output(self.data_pin, GPIO.LOW)
@@ -34,27 +35,24 @@ class MY9221:
 
     def clear_all(self):
         for _ in range(10):
-            self.send_16bit(0x0000)
+            self.send_16bit(False)
         self.latch_data()
 
     def set_level(self, level):
         """
-        Enciende los primeros 'level' LEDs y mantiene el resto apagados.
-        Solo actualiza si el nivel cambia.
+        Enciende solo los primeros 'level' LEDs y apaga el resto.
+        Solo actualiza si cambia el nivel.
         """
         if level == self.current_level:
-            return  # No hacer nada si no cambia
+            return  # No hacer nada si no hay cambio
 
-        # Apagar todos brevemente
+        # Apagar todo brevemente
         self.clear_all()
         time.sleep(0.1)
 
-        # Encender los primeros 'level' LEDs
+        # Enciende los primeros 'level' LEDs
         for i in range(10):
-            if i < level:
-                self.send_16bit(0xFFFF)
-            else:
-                self.send_16bit(0x0000)
+            self.send_16bit(i < level)
         self.latch_data()
         self.current_level = level
 
