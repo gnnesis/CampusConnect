@@ -1,118 +1,135 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import sqlite3
-from datetime import datetime
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 app = Flask(__name__)
 CORS(app)
 
-# Base de datos en la misma carpeta
-DB_PATH = 'sensor_data.db'
+# ============================================
+# ⭐ CONFIGURACIÓN INFLUXDB
+# ============================================
+INFLUX_URL = "http://10.172.117.140:8087"
+INFLUX_TOKEN = "vrAK4VDblEmBWNreJJF2oY65lGGaJcuKTVxWui087dDGEYH7zVV64QXlNjEKA0mILZ4_yOxHlUh2op4G9lgNVA==" 
+INFLUX_ORG = "Deusto"
+INFLUX_BUCKET = "deusto"
 
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS sensor_readings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sensor_id TEXT,
-            latitude REAL,
-            longitude REAL,
-            intensity REAL,
-            category TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    conn.commit()
-    conn.close()
-    print("Base de datos inicializada")
+# Cliente InfluxDB
+client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+write_api = client.write_api(write_options=SYNCHRONOUS)
+query_api = client.query_api()
 
-init_db()
+print("✅ Conectado a InfluxDB")
 
+# ============================================
+# ENDPOINT 1: Recibir datos de sensores
+# ============================================
 @app.route('/api/sensor-data', methods=['POST'])
 def receive_sensor_data():
     try:
         data = request.json
         
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute('''
-            INSERT INTO sensor_readings 
-            (sensor_id, latitude, longitude, intensity, category)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (
-            data['sensor_id'],
-            data['latitude'],
-            data['longitude'],
-            data['intensity'],
-            data['category']
-        ))
-        conn.commit()
-        conn.close()
+        # Crear punto de datos
+        point = Point("sensor_reading") \
+            .tag("sensor_id", data['sensor_id']) \
+            .tag("category", data['category']) \
+            .field("latitude", float(data['latitude'])) \
+            .field("longitude", float(data['longitude'])) \
+            .field("intensity", float(data['intensity']))
         
-        print(f"Datos recibidos: {data['sensor_id']} = {data['intensity']:.2f}")
+        # Escribir en InfluxDB
+        write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=point)
+        
+        print(f"📊 {data['sensor_id']}: {data['intensity']:.2f}")
         return jsonify({"status": "success"}), 200
         
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# ============================================
+# ENDPOINT 2: Datos para el mapa de calor
+# ============================================
 @app.route('/api/heatmap-data/<category>', methods=['GET'])
 def get_heatmap_data(category):
     try:
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        
         if category == 'all':
-            c.execute('''
-                SELECT latitude, longitude, AVG(intensity) as avg_intensity
-                FROM sensor_readings
-                WHERE timestamp > datetime('now', '-5 minutes')
-                GROUP BY sensor_id
-            ''')
+            query = f'''
+                from(bucket: "{INFLUX_BUCKET}")
+                |> range(start: -5m)
+                |> filter(fn: (r) => r["_measurement"] == "sensor_reading")
+                |> filter(fn: (r) => r["_field"] == "intensity" or r["_field"] == "latitude" or r["_field"] == "longitude")
+                |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+                |> group(columns: ["sensor_id"])
+                |> mean()
+            '''
         else:
-            c.execute('''
-                SELECT latitude, longitude, AVG(intensity) as avg_intensity
-                FROM sensor_readings
-                WHERE category = ? 
-                AND timestamp > datetime('now', '-5 minutes')
-                GROUP BY sensor_id
-            ''', (category,))
+            query = f'''
+                from(bucket: "{INFLUX_BUCKET}")
+                |> range(start: -5m)
+                |> filter(fn: (r) => r["_measurement"] == "sensor_reading")
+                |> filter(fn: (r) => r["category"] == "{category}")
+                |> filter(fn: (r) => r["_field"] == "intensity" or r["_field"] == "latitude" or r["_field"] == "longitude")
+                |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+                |> group(columns: ["sensor_id"])
+                |> mean()
+            '''
         
-        rows = c.fetchall()
-        conn.close()
+        result = query_api.query(org=INFLUX_ORG, query=query)
         
-        data = [[row[0], row[1], row[2]] for row in rows]
+        data = []
+        for table in result:
+            for record in table.records:
+                try:
+                    lat = record.values.get('latitude')
+                    lon = record.values.get('longitude')
+                    intensity = record.values.get('intensity')
+                    
+                    if lat and lon and intensity:
+                        data.append([lat, lon, intensity])
+                except:
+                    continue
         
-        print(f"Enviando {len(data)} puntos para '{category}'")
+        print(f"📍 {len(data)} puntos para '{category}'")
         return jsonify(data)
         
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         return jsonify([]), 500
 
+# ============================================
+# ENDPOINT 3: Debug - ver todos los datos
+# ============================================
 @app.route('/api/all-data', methods=['GET'])
 def get_all_data():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('SELECT * FROM sensor_readings ORDER BY timestamp DESC LIMIT 50')
-    rows = c.fetchall()
-    conn.close()
-    
-    data = [{
-        'id': row[0],
-        'sensor_id': row[1],
-        'latitude': row[2],
-        'longitude': row[3],
-        'intensity': row[4],
-        'category': row[5],
-        'timestamp': row[6]
-    } for row in rows]
-    
-    return jsonify(data)
+    try:
+        query = f'''
+            from(bucket: "{INFLUX_BUCKET}")
+            |> range(start: -1h)
+            |> filter(fn: (r) => r["_measurement"] == "sensor_reading")
+            |> limit(n: 50)
+        '''
+        
+        result = query_api.query(org=INFLUX_ORG, query=query)
+        
+        data = []
+        for table in result:
+            for record in table.records:
+                data.append({
+                    'time': record.get_time().isoformat(),
+                    'sensor_id': record.values.get('sensor_id'),
+                    'category': record.values.get('category'),
+                    'field': record.get_field(),
+                    'value': record.get_value()
+                })
+        
+        return jsonify(data)
+        
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return jsonify([]), 500
 
 if __name__ == '__main__':
-    print("Servidor iniciado en http://localhost:5000")
-    print("Esperando datos de sensores...")
+    print("🚀 Servidor Flask iniciado en puerto 5000")
+    print("📡 Esperando datos de sensores...")
     app.run(host='0.0.0.0', port=5000, debug=True)
-
