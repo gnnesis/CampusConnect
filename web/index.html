@@ -7,35 +7,37 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
-    <style>
-        #map {
-            height: 600px;
-            width: 100%;
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css"/>
 </head>
 
 <body>
-    <h2>CampusConnect - Heatmap Prototype</h2>
-    <div id="map"></div>
+    <div class="container">
+        <header>
+            <h1>CampusConnect</h1>
+            <p>Campus Heatmap Prototype</p>
+        </header>
+        
+        <div class="controls">
+            <div class="button-group">
+                <button class="filter-btn active" data-filter="all">All Areas</button>
+                <button class="filter-btn" data-filter="social">Social</button>
+                <button class="filter-btn" data-filter="relax">Relax</button>
+                <button class="filter-btn" data-filter="food">Food</button>
+                <button class="filter-btn" data-filter="study">Study</button>
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <!-- Heatmap plugin (optional for later) -->
+    <!-- Heatmap plugin -->
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
-    <script>
-        // Center of University of Deusto Bilbao
-        const map = L.map('map').setView([43.2683, -2.9469], 17);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
-        }).addTo(map);
-
-        // For now, NO heatmap points (empty map)
-        // Add heatmap later like: L.heatLayer(points).addTo(map);
-
-    </script>
+    <!-- Custom Script -->
+    <script src="script.js"></script>
 </body>
 </html>
