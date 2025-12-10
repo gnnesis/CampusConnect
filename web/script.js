@@ -14,50 +14,42 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // ========================
-// DATOS SIMULADOS DE SENSORES
+// DATOS REALES DE SENSORES
 // ========================
-const dataPoints = {
-    all: [
-        [43.2711, -2.9380, 0.9],
-        [43.2712, -2.9381, 0.85],
-        [43.2710, -2.9379, 0.8],
-        [43.2708, -2.9382, 0.7],
-        [43.2709, -2.9383, 0.75],
-        [43.2714, -2.9378, 0.6],
-        [43.2715, -2.9377, 0.65],
-        [43.2707, -2.9380, 0.5],
-        [43.2706, -2.9381, 0.55]
-    ],
-    social: [
-        [43.2711, -2.9380, 1.0],
-        [43.2712, -2.9381, 0.95],
-        [43.2710, -2.9379, 0.9],
-        [43.2713, -2.9379, 0.8],
-        [43.2714, -2.9378, 0.75]
-    ],
-    relax: [
-        [43.2714, -2.9378, 0.85],
-        [43.2715, -2.9377, 0.9],
-        [43.2716, -2.9376, 0.8],
-        [43.2709, -2.9377, 0.7]
-    ],
-    food: [
-        [43.2711, -2.9380, 1.0],
-        [43.2712, -2.9381, 0.95],
-        [43.2710, -2.9379, 0.9],
-        [43.2708, -2.9379, 0.6]
-    ],
-    study: [
-        [43.2708, -2.9382, 0.9],
-        [43.2709, -2.9383, 0.85],
-        [43.2707, -2.9383, 0.8],
-        [43.2707, -2.9380, 0.75],
-        [43.2706, -2.9381, 0.7]
-    ]
-};
+const SENSOR_API_URL = "http://localhost:5001/api/sensors"; // tu backend de Flask
 
-// Variable para la capa de calor actual
-let currentHeatLayer = null;
+async function fetchSensorData() {
+    try {
+        const res = await fetch(SENSOR_API_URL);
+        const data = await res.json();
+
+        // Actualizar DOM
+        document.getElementById("temp-value").textContent = `${data.temperature.toFixed(1)}°C`;
+        document.getElementById("humidity-value").textContent = `${data.humidity.toFixed(1)}%`;
+        document.getElementById("noise-value").textContent = data.noise;
+        document.getElementById("noise-status").textContent = data.noise_level;
+        document.getElementById("air-value").textContent = data.air_quality;
+        document.getElementById("air-status").textContent = data.air_status;
+        document.getElementById("people-value").textContent = data.people_present ? "Sí" : "No";
+        document.getElementById("distance-value").textContent = data.distance.toFixed(1);
+        document.getElementById("sensor-update").textContent = `Última actualización: ${new Date(data.timestamp).toLocaleTimeString('es-ES')}`;
+
+        // También puedes actualizar stats si quieres
+        const stats = document.getElementById('stats');
+        stats.innerHTML = `
+            <p><strong>Categoría:</strong> ${data.category}</p>
+            <p><strong>Puntos activos:</strong> 1 sensor</p>
+            <p><strong>Intensidad promedio:</strong> --%</p>
+            <p><strong>Última actualización:</strong> ${new Date(data.timestamp).toLocaleTimeString('es-ES')}</p>
+        `;
+    } catch (err) {
+        console.error("Error obteniendo datos de sensores:", err);
+    }
+}
+
+// Actualizar cada 10 segundos (coincide con el auto-save del backend)
+fetchSensorData(); // fetch inicial
+setInterval(fetchSensorData, 10000);
 
 // ========================
 // FUNCIONES DE MAPA Y HEATMAP

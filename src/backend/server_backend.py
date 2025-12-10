@@ -10,11 +10,11 @@ from influxdb import InfluxDBClient
 # =========================
 # CONFIGURACIÓN INFLUXDB 1.8
 # =========================
-INFLUX_HOST = "localhost"
-INFLUX_PORT = 8087          # puerto de InfluxDB
-INFLUX_DB = "campusconnect" # tu base de datos
-INFLUX_USER = "admin"       # tu usuario
-INFLUX_PASSWORD = "admin123" # tu contraseña
+INFLUX_HOST = "10.172.103.162"  # IP del servidor Linux con InfluxDB
+INFLUX_PORT = 8086               # puerto por defecto para InfluxDB 1.x
+INFLUX_DB = "campusconnect"      # tu base de datos
+INFLUX_USER = "admin"            # tu usuario
+INFLUX_PASSWORD = "admin123"     # tu contraseña
 
 # =========================
 # Cliente InfluxDB 1.x
@@ -149,6 +149,16 @@ def post_sensor_data():
     data["timestamp"] = datetime.now(timezone.utc).isoformat()
     ok = save_to_influx(data)
     return jsonify({"status": "success" if ok else "error"})
+
+@app.route('/api/sensor-data-last', methods=['GET'])
+def get_last_sensor_data():
+    """Devuelve las últimas 5 lecturas de sensores"""
+    try:
+        result = client.query("SELECT * FROM sensor_reading ORDER BY time DESC LIMIT 5")
+        points = list(result.get_points())
+        return jsonify(points)
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 # =========================
 # Main
