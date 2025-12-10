@@ -6,14 +6,13 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Colores Universidad de Deusto */
     background: linear-gradient(135deg, rgb(0,74,148) 0%, rgb(0,94,184) 100%);
     min-height: 100vh;
     padding: 20px;
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     background: white;
     border-radius: 15px;
@@ -22,7 +21,6 @@ body {
 }
 
 header {
-    /* Azul corporativo Deusto */
     background: linear-gradient(135deg, rgb(0,74,148) 0%, rgb(0,94,184) 100%);
     color: white;
     padding: 30px;
@@ -40,16 +38,155 @@ header p {
     opacity: 0.95;
 }
 
-.controls {
-    padding: 20px 30px;
-    background: #f8f9fa;
-    border-bottom: 2px solid #e9ecef;
+.weather-bar {
+    background: rgba(255,255,255,0.15);
+    padding: 20px;
+    margin-top: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    backdrop-filter: blur(10px);
 }
 
-.controls h3 {
-    margin-bottom: 15px;
+.weather-main {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+}
+
+.weather-icon-large {
+    font-size: 4em;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+}
+
+.weather-temp-main {
+    text-align: center;
+}
+
+.current-temp {
+    font-size: 3em;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.temp-range {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-top: 5px;
+}
+
+.temp-max {
+    color: #ffeb3b;
+}
+
+.temp-min {
+    color: #81d4fa;
+}
+
+.weather-details {
+    display: flex;
+    gap: 25px;
+}
+
+.weather-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.weather-item-icon {
+    font-size: 1.8em;
+}
+
+.weather-item-label {
+    font-size: 0.85em;
+    opacity: 0.9;
+}
+
+.weather-item-value {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.rain-probability {
+    background: rgba(33, 150, 243, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 2px solid rgba(33, 150, 243, 0.5);
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0;
+}
+
+.sidebar {
+    background: #f8f9fa;
+    border-right: 2px solid #e9ecef;
+    padding: 20px;
+}
+
+.sidebar h3 {
     color: rgb(0,74,148);
+    margin-bottom: 15px;
     font-weight: 600;
+}
+
+.sensor-card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border-left: 4px solid rgb(0,74,148);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sensor-title {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.sensor-value {
+    font-size: 1.5em;
+    color: rgb(0,74,148);
+    font-weight: bold;
+}
+
+.sensor-status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+.status-good { background: #28a745; color: white; }
+.status-regular { background: #ffc107; color: #333; }
+.status-bad { background: #dc3545; color: white; }
+.status-low { background: #17a2b8; color: white; }
+.status-medium { background: #ffc107; color: #333; }
+.status-high { background: #dc3545; color: white; }
+
+.map-container {
+    position: relative;
+}
+
+.controls {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
 }
 
 .button-group {
@@ -84,13 +221,11 @@ header p {
 #map {
     height: 600px;
     width: 100%;
-    border: none;
 }
 
 .legend {
-    padding: 20px 30px;
-    background: #f8f9fa;
-    border-top: 2px solid #e9ecef;
+    padding: 20px;
+    background: white;
 }
 
 .legend h4 {
@@ -115,35 +250,72 @@ header p {
     border: 1px solid #ddd;
 }
 
-.info-panel {
-    padding: 30px;
-    background: white;
-}
-
-.info-panel h3 {
-    color: rgb(0,74,148);
-    margin-bottom: 15px;
-    font-weight: 600;
-}
-
 #stats {
     background: #f8f9fa;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     border-left: 4px solid rgb(0,74,148);
+    margin-top: 15px;
 }
 
 #stats p {
     color: #495057;
-    line-height: 1.8;
+    line-height: 1.6;
     margin: 5px 0;
+    font-size: 0.9em;
 }
 
 #stats strong {
     color: rgb(0,74,148);
 }
 
-/* Responsive */
+.grafana-section {
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 2px solid #e9ecef;
+}
+
+.grafana-section h3 {
+    color: rgb(0,74,148);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.grafana-embed {
+    width: 100%;
+    height: 500px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.last-update {
+    text-align: right;
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 10px;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.updating {
+    animation: pulse 1.5s infinite;
+}
+
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        border-right: none;
+        border-bottom: 2px solid #e9ecef;
+    }
+}
+
 @media (max-width: 768px) {
     .button-group {
         flex-direction: column;
@@ -159,5 +331,18 @@ header p {
     
     header h1 {
         font-size: 2em;
+    }
+
+    .weather-bar {
+        gap: 15px;
+    }
+
+    .weather-main {
+        flex-direction: column;
+    }
+
+    .weather-details {
+        flex-wrap: wrap;
+        gap: 15px;
     }
 }

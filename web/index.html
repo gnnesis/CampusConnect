@@ -1,43 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>CampusConnect Heatmap</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect - Universidad de Deusto</title>
+    
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <div class="container">
         <header>
-            <h1>CampusConnect</h1>
-            <p>Campus Heatmap Prototype</p>
+            <h1>🎓 CampusConnect</h1>
+            <p>Sistema de Monitorización Inteligente - Universidad de Deusto, Bilbao</p>
+            
+            <div class="weather-bar">
+                <div class="weather-main">
+                    <div class="weather-icon-large" id="weather-icon-main">☁️</div>
+                    <div class="weather-temp-main">
+                        <div class="current-temp" id="current-temp">--°</div>
+                        <div class="temp-range">
+                            <span class="temp-max">↑ <span id="temp-max">--°</span></span> / 
+                            <span class="temp-min">↓ <span id="temp-min">--°</span></span>
+                        </div>
+                        <div style="font-size: 0.95em; margin-top: 5px; opacity: 0.95;" id="weather-desc-main">Cargando...</div>
+                    </div>
+                </div>
+
+                <div class="weather-details">
+                    <div class="weather-item rain-probability">
+                        <div class="weather-item-icon">🌧️</div>
+                        <div class="weather-item-value" id="rain-prob">--%</div>
+                        <div class="weather-item-label">Prob. Lluvia</div>
+                    </div>
+
+                    <div class="weather-item">
+                        <div class="weather-item-icon">💧</div>
+                        <div class="weather-item-value" id="humidity-ext">--%</div>
+                        <div class="weather-item-label">Humedad</div>
+                    </div>
+
+                    <div class="weather-item">
+                        <div class="weather-item-icon">💨</div>
+                        <div class="weather-item-value" id="wind-speed">--</div>
+                        <div class="weather-item-label">Viento (m/s)</div>
+                    </div>
+
+                    <div class="weather-item">
+                        <div class="weather-item-icon">🌡️</div>
+                        <div class="weather-item-value" id="feels-like">--°</div>
+                        <div class="weather-item-label">Sensación</div>
+                    </div>
+                </div>
+            </div>
         </header>
-        
-        <div class="controls">
-            <div class="button-group">
-                <button class="filter-btn active" data-filter="all">All Areas</button>
-                <button class="filter-btn" data-filter="social">Social</button>
-                <button class="filter-btn" data-filter="relax">Relax</button>
-                <button class="filter-btn" data-filter="food">Food</button>
-                <button class="filter-btn" data-filter="study">Study</button>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <h3>📊 Sensores en Tiempo Real</h3>
+                
+                <div class="sensor-card">
+                    <div class="sensor-title">🌡️ Temperatura</div>
+                    <div class="sensor-value" id="temp-value">--°C</div>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-title">💧 Humedad</div>
+                    <div class="sensor-value" id="humidity-value">--%</div>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-title">🔊 Nivel de Ruido</div>
+                    <div class="sensor-value" id="noise-value">--</div>
+                    <span class="sensor-status" id="noise-status">--</span>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-title">🌫️ Calidad del Aire</div>
+                    <div class="sensor-value" id="air-value">--</div>
+                    <span class="sensor-status" id="air-status">--</span>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-title">👥 Presencia</div>
+                    <div class="sensor-value" id="people-value">--</div>
+                    <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
+                        Distancia: <span id="distance-value">--</span> cm
+                    </div>
+                </div>
+
+                <div class="last-update" id="sensor-update">
+                    Actualizando...
+                </div>
+
+                <div id="stats">
+                    <p><strong>Categoría:</strong> Todas las áreas</p>
+                    <p><strong>Puntos activos:</strong> -- sensores</p>
+                    <p><strong>Intensidad promedio:</strong> --%</p>
+                    <p><strong>Última actualización:</strong> --</p>
+                </div>
+            </aside>
+
+            <div class="map-container">
+                <div class="controls">
+                    <h3>🔍 Filtros de Visualización</h3>
+                    <div class="button-group">
+                        <button class="filter-btn active" data-filter="all">📍 Todas las áreas</button>
+                        <button class="filter-btn" data-filter="social">👥 Zonas sociales</button>
+                        <button class="filter-btn" data-filter="relax">🌳 Áreas de relajación</button>
+                        <button class="filter-btn" data-filter="food">🍽️ Puntos de comida</button>
+                        <button class="filter-btn" data-filter="study">📚 Espacios de estudio</button>
+                    </div>
+                </div>
+
+                <div id="map"></div>
+
+                <div class="legend">
+                    <h4>📊 Leyenda de Intensidad</h4>
+                    <div class="legend-item">
+                        <div class="color-box" style="background: linear-gradient(to right, blue, cyan);"></div>
+                        <span>Baja actividad (0-30%) - Zona tranquila</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background: linear-gradient(to right, lime, yellow);"></div>
+                        <span>Actividad media (30-70%) - Uso moderado</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background: linear-gradient(to right, yellow, red);"></div>
+                        <span>Alta actividad (70-100%) - Zona congestionada</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="map"></div>
+        <div class="grafana-section">
+            <h3>📈 Análisis Histórico (Grafana)</h3>
+            <iframe 
+                class="grafana-embed" 
+                src="http://localhost:3000/d/campus-dashboard?orgId=1&refresh=5s&theme=light&kiosk"
+                frameborder="0">
+            </iframe>
+            <p style="margin-top: 10px; color: #666; text-align: center;">
+                💡 Panel completo disponible en: <a href="http://localhost:3000" target="_blank" style="color: rgb(0,74,148);">Grafana Dashboard</a>
+            </p>
+        </div>
     </div>
 
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-    <!-- Heatmap plugin -->
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-
-    <!-- Custom Script -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
+    <!-- JS personalizado -->
     <script src="script.js"></script>
 </body>
 </html>
