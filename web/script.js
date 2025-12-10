@@ -1,7 +1,34 @@
 // ========================
 // CONFIGURACIÓN
 // ========================
-const API_URL = "http://localhost:5000"; // URL del backend
+const API_URL = "http://localhost:5001"; // URL del backend
+let currentHeatLayer = null;
+
+// Inicializamos puntos de ejemplo para heatmap
+// Inicializamos puntos de ejemplo para heatmap (corregido)
+const dataPoints = {
+    all: [
+        [43.2711, -2.9380, 0.5],
+        [43.2708, -2.9382, 0.7],
+        [43.2714, -2.9378, 0.3],
+        [43.27133803087678, -2.9377551379742366, 0.5]  // este sería el cuarto pintxo
+    ],
+    social: [
+        [43.2713679879075, -2.938815222975388, 0.6]
+    ],
+    relax: [
+        [43.27075949744019, -2.937265027859081, 0.4],
+        [43.27107288785087, -2.9363857869343892, 0.5]
+    ],
+    food: [
+        [43.27108582275102, -2.936691133270228, 0.7]
+    ],
+    study: [
+        [43.27133803087678, -2.9377551379742366, 0.5]
+    ]
+};
+
+
 
 // ========================
 // INICIALIZAR MAPA
@@ -16,7 +43,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // ========================
 // DATOS REALES DE SENSORES
 // ========================
-const SENSOR_API_URL = "http://localhost:5001/api/sensors"; // tu backend de Flask
+const SENSOR_API_URL = `${API_URL}/api/sensors`; // tu backend de Flask
 
 async function fetchSensorData() {
     try {
@@ -34,22 +61,10 @@ async function fetchSensorData() {
         document.getElementById("distance-value").textContent = data.distance.toFixed(1);
         document.getElementById("sensor-update").textContent = `Última actualización: ${new Date(data.timestamp).toLocaleTimeString('es-ES')}`;
 
-        // También puedes actualizar stats si quieres
-        const stats = document.getElementById('stats');
-        stats.innerHTML = `
-            <p><strong>Categoría:</strong> ${data.category}</p>
-            <p><strong>Puntos activos:</strong> 1 sensor</p>
-            <p><strong>Intensidad promedio:</strong> --%</p>
-            <p><strong>Última actualización:</strong> ${new Date(data.timestamp).toLocaleTimeString('es-ES')}</p>
-        `;
     } catch (err) {
         console.error("Error obteniendo datos de sensores:", err);
     }
 }
-
-// Actualizar cada 10 segundos (coincide con el auto-save del backend)
-fetchSensorData(); // fetch inicial
-setInterval(fetchSensorData, 10000);
 
 // ========================
 // FUNCIONES DE MAPA Y HEATMAP
@@ -64,47 +79,15 @@ function showHeatmap(category) {
         blur: 35,
         maxZoom: 17,
         max: 1.0,
-        gradient: {
-            0.0: 'blue',
-            0.3: 'cyan',
-            0.5: 'lime',
-            0.7: 'yellow',
-            1.0: 'red'
-        }
+        gradient: {0.0: 'blue', 0.3: 'cyan', 0.5: 'lime', 0.7: 'yellow', 1.0: 'red'}
     }).addTo(map);
-
-    updateStats(category);
-}
-
-function updateStats(category, points) {
-    const stats = document.getElementById('stats');
-    const categoryNames = {
-        all: 'Todas las áreas',
-        social: 'Zonas de interacción social',
-        relax: 'Áreas de relajación',
-        food: 'Puntos de comida',
-        study: 'Espacios de estudio'
-    };
-
-    if (!points || points.length === 0) {
-        points = dataPoints[category];
-    }
-
-    const avgIntensity = (points.reduce((sum, p) => sum + p[2], 0) / points.length * 100).toFixed(1);
-
-    stats.innerHTML = `
-        <p><strong>Categoría:</strong> ${categoryNames[category]}</p>
-        <p><strong>Puntos de datos:</strong> ${points.length} sensores activos</p>
-        <p><strong>Intensidad promedio:</strong> ${avgIntensity}%</p>
-        <p><strong>Última actualización:</strong> ${new Date().toLocaleTimeString('es-ES')}</p>
-    `;
 }
 
 function addMarkers() {
     const markers = [
-        { pos: [43.2711, -2.9380], name: '☕ Cafetería Principal', desc: 'Alto tráfico de estudiantes' },
-        { pos: [43.2708, -2.9382], name: '📚 Biblioteca', desc: 'Zona de estudio tranquila' },
-        { pos: [43.2714, -2.9378], name: '🌳 Zona Verde', desc: 'Área de descanso al aire libre' }
+        { pos: [43.27177440959463, -2.9391453516571033], name: '☕ Cafetería Principal', desc: 'Alto tráfico de estudiantes' },
+        { pos: [43.271380049714786, -2.937798139863879], name: '📚 Biblioteca', desc: 'Zona de estudio tranquila' },
+        { pos: [43.271302716504934, -2.9388450675286926], name: '🌳 Zona Verde', desc: 'Área de descanso al aire libre' }
     ];
 
     markers.forEach(marker => {
@@ -112,32 +95,6 @@ function addMarkers() {
             .addTo(map)
             .bindPopup(`<strong>${marker.name}</strong><br>${marker.desc}`);
     });
-}
-
-// ========================
-// FILTROS DE BOTONES
-// ========================
-document.querySelectorAll('.filter-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-        const filter = this.getAttribute('data-filter');
-        showHeatmap(filter);
-    });
-});
-
-// ========================
-// SIMULACIÓN DE DATOS EN TIEMPO REAL
-// ========================
-function simulateRealTimeData() {
-    setInterval(() => {
-        const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
-        dataPoints[activeFilter] = dataPoints[activeFilter].map(point => {
-            const variation = (Math.random() - 0.5) * 0.1;
-            return [point[0], point[1], Math.max(0.1, Math.min(1.0, point[2] + variation))];
-        });
-        showHeatmap(activeFilter);
-    }, 5000);
 }
 
 // ========================
@@ -157,21 +114,6 @@ async function fetchWeather() {
         document.getElementById("wind-speed").textContent = data.wind_speed;
         document.getElementById("feels-like").textContent = `${data.feels_like.toFixed(1)}°`;
 
-        const iconEl = document.getElementById("weather-icon-main");
-        const main = data.weather_main.toLowerCase();
-        const icons = {
-            clear: "☀️",
-            clouds: "☁️",
-            rain: "🌧️",
-            drizzle: "🌦️",
-            thunderstorm: "⛈️",
-            snow: "❄️",
-            mist: "🌫️",
-            haze: "🌫️",
-            fog: "🌫️"
-        };
-        iconEl.textContent = icons[main] || "☁️";
-
     } catch (err) {
         console.error("Error obteniendo clima:", err);
     }
@@ -180,8 +122,12 @@ async function fetchWeather() {
 // ========================
 // INICIALIZACIÓN
 // ========================
-showHeatmap('all');
-addMarkers();
-simulateRealTimeData();
-fetchWeather();
-setInterval(fetchWeather, 10000); // actualizar clima cada 10s
+document.addEventListener("DOMContentLoaded", () => {
+    showHeatmap('all');
+    addMarkers();
+    fetchSensorData();
+    fetchWeather();
+
+    setInterval(fetchSensorData, 10000);
+    setInterval(fetchWeather, 10000);
+});
