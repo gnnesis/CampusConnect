@@ -5,23 +5,33 @@ import threading
 import time
 from datetime import datetime, timezone
 import random
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb import InfluxDBClient
 
 # =========================
-# CONFIGURACIÓN
+# CONFIGURACIÓN INFLUXDB 1.8
 # =========================
-INFLUX_URL = "http://localhost:8087"
-INFLUX_TOKEN = "vrAK4VDblEmBWNreJJF2oY65lGGaJcuKTVxWui087dDGEYH7zVV64QXlNjEKA0mILZ4_yOxHlUh2op4G9lgNVA=="
-INFLUX_ORG = "deusto"
-INFLUX_BUCKET = "campusconnect"
+INFLUX_HOST = "localhost"
+INFLUX_PORT = 8087          # puerto de InfluxDB
+INFLUX_DB = "campusconnect" # tu base de datos
+INFLUX_USER = "admin"       # tu usuario
+INFLUX_PASSWORD = "admin123" # tu contraseña
 
 # =========================
-# Cliente InfluxDB
+# Cliente InfluxDB 1.x
 # =========================
-client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
-write_api = client.write_api(write_options=SYNCHRONOUS)
-query_api = client.query_api()
+client = InfluxDBClient(
+    host=INFLUX_HOST,
+    port=INFLUX_PORT,
+    username=INFLUX_USER,
+    password=INFLUX_PASSWORD,
+    database=INFLUX_DB
+)
+
+# Crear base de datos si no existe
+databases = [db['name'] for db in client.get_list_database()]
+if INFLUX_DB not in databases:
+    client.create_database(INFLUX_DB)
+    print(f"✅ Base de datos '{INFLUX_DB}' creada")
 
 # =========================
 # Flask app
@@ -48,46 +58,35 @@ sensor_data = {
 }
 
 # =========================
-# Guardar en InfluxDB
+# Función para guardar datos en InfluxDB 1.x
 # =========================
-def save_to_influx(data: dict):
+def save_to_influx(data):
     try:
-        p = Point("sensor_reading") \
-            .tag("sensor_id", str(data.get("sensor_id", "unknown"))) \
-            .tag("category", str(data.get("category", "unknown"))) \
-            .tag("noise_level", str(data.get("noise_level", "unknown"))) \
-            .tag("air_status", str(data.get("air_status", "unknown")))
-
-        # Fields numéricos / booleanos
-        if data.get("temperature") is not None:
-            p = p.field("temperature", float(data["temperature"]))
-        if data.get("humidity") is not None:
-            p = p.field("humidity", float(data["humidity"]))
-        if data.get("noise") is not None:
-            p = p.field("noise", int(data["noise"]))
-        if data.get("air_quality") is not None:
-            p = p.field("air_quality", int(data["air_quality"]))
-        if data.get("people_present") is not None:
-            p = p.field("people_present", bool(data["people_present"]))
-        if data.get("distance") is not None:
-            p = p.field("distance", float(data["distance"]))
-
-        # Localización
-        loc = data.get("location", {})
-        if isinstance(loc, dict):
-            if loc.get("lat") is not None:
-                p = p.field("latitude", float(loc["lat"]))
-            if loc.get("lon") is not None:
-                p = p.field("longitude", float(loc["lon"]))
-
-        # Timestamp UTC correcto (sin warnings)
-        p = p.time(datetime.now(timezone.utc))
-
-        write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=p)
-        print(f"📊 Escrito en Influx: {data.get('sensor_id')}")
-
+        json_body = [
+            {
+                "measurement": "sensor_reading",
+                "tags": {
+                    "sensor_id": data.get("sensor_id", "unknown"),
+                    "category": data.get("category", "unknown"),
+                    "noise_level": data.get("noise_level", "unknown"),
+                    "air_status": data.get("air_status", "unknown")
+                },
+                "time": datetime.now(timezone.utc).isoformat(),
+                "fields": {
+                    "temperature": float(data.get("temperature", 0)),
+                    "humidity": float(data.get("humidity", 0)),
+                    "noise": int(data.get("noise", 0)),
+                    "air_quality": int(data.get("air_quality", 0)),
+                    "people_present": bool(data.get("people_present", False)),
+                    "distance": float(data.get("distance", 0)),
+                    "latitude": float(data.get("location", {}).get("lat", 0)),
+                    "longitude": float(data.get("location", {}).get("lon", 0))
+                }
+            }
+        ]
+        client.write_points(json_body)
+        print(f"📊 Guardado en Influx: {data.get('sensor_id')}")
         return True
-
     except Exception as e:
         print(f"❌ Error al guardar en Influx: {e}")
         return False
@@ -124,7 +123,7 @@ def read_sensors_simulated():
     sensor_data["timestamp"] = datetime.now(timezone.utc).isoformat()
 
 # =========================
-# Hilo automático
+# Hilo automático que guarda datos cada N segundos
 # =========================
 def auto_save_loop(interval=10):
     print(f"🔁 Auto-save thread iniciado: cada {interval}s")
@@ -140,10 +139,12 @@ threading.Thread(target=auto_save_loop, daemon=True).start()
 # =========================
 @app.route('/api/sensors', methods=['GET'])
 def get_sensors():
+    """Devuelve el estado actual de los sensores"""
     return jsonify(sensor_data)
 
 @app.route('/api/sensor-data', methods=['POST'])
 def post_sensor_data():
+    """Recibe JSON y lo guarda en InfluxDB"""
     data = request.get_json(force=True)
     data["timestamp"] = datetime.now(timezone.utc).isoformat()
     ok = save_to_influx(data)
