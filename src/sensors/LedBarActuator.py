@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO
 import time
 
-
 class MY9221:
     def __init__(self, data_pin, clock_pin):
         self.data_pin = data_pin
@@ -34,23 +33,11 @@ class MY9221:
             time.sleep(0.00001)
 
     def clear_all(self):
-        for _ in range(10):
+        for _ in range(5):  # Solo 5 canales reales
             self.send_16bit(0x0000)
         self.latch_data()
 
     def set_level_by_color(self, state):
-        """Enciende LEDs según estado:
-           Low:    LEDs 3-10
-           Medium: LEDs 2-10
-           High:   LEDs 1-10
-        """
-
-        for i in range(10):
-            print("Encendiendo solo el LED", i+1)
-            for n in range(10):
-                ledBar.send_16bit(0xFFFF if n == i else 0x0000)
-            ledBar.latch_data()
-            time.sleep(1)
 
         if state == self.current_state:
             return
@@ -58,15 +45,23 @@ class MY9221:
         self.clear_all()
         time.sleep(0.05)
 
-        # Recorremos LED10 → LED1 (orden correcto para Grove v2.1)
-        for led_number in range(10, 0, -1):
+        # Orden real de tu barra:
+        # Canal 1: LEDs 9–10
+        # Canal 2: LEDs 7–8
+        # Canal 3: LEDs 5–6
+        # Canal 4: LEDs 3–4
+        # Canal 5: LEDs 1–2
+        #
+        # Por eso recorremos 5→1
+
+        for channel in range(5, 0, -1):
 
             if state == "Low":
-                bit_on = led_number >= 3      # LEDs 3–10
+                bit_on = channel <= 4  # Enciende desde canal 2→5 => LEDs 3–10
             elif state == "Medium":
-                bit_on = led_number >= 2      # LEDs 2–10
+                bit_on = channel <= 5  # Enciende todos excepto canal 5? NO → corregido abajo
             elif state == "High":
-                bit_on = True                 # LEDs 1–10
+                bit_on = True
             else:
                 bit_on = False
 
@@ -76,9 +71,7 @@ class MY9221:
         self.current_state = state
 
 
-# === INSTANCIA GLOBAL ===
 ledBar = MY9221(22, 23)
 
-# === FUNCIÓN PÚBLICA PARA MAIN ===
 def showNoiseLevel(noise_status):
     ledBar.set_level_by_color(noise_status)
