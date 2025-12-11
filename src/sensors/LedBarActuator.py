@@ -36,29 +36,29 @@ class MY9221:
         self.latch_data()
 
     def set_level_by_color(self, state):
-		if state == self.current_state:
-			return
+        if state == self.current_state:
+            return
 
-    self.clear_all()
-    time.sleep(0.05)
+        self.clear_all()
+        time.sleep(0.05)
 
-    for i in range(10):
-        # Convertir al índice físico del LED
-        led_index = 9 - i  # MY9221 envía primero LED10
+        for i in range(10):
+            # Convertir al índice físico del LED
+            led_index = 9 - i  # MY9221 envía primero LED10
 
-        if state == "Low":
-            bit_on = led_index >= 2   # LED 3–10
-        elif state == "Medium":
-            bit_on = led_index >= 1   # LED 2–10
-        elif state == "High":
-            bit_on = True             # LED 1–10
-        else:
-            bit_on = False
+            if state == "Low":
+                bit_on = led_index >= 2   # LED 3–10
+            elif state == "Medium":
+                bit_on = led_index >= 1   # LED 2–10
+            elif state == "High":
+                bit_on = True             # LED 1–10
+            else:
+                bit_on = False
 
-        self.send_16bit(bit_on)
+            self.send_16bit(bit_on)
 
-    self.latch_data()
-    self.current_state = state
+        self.latch_data()
+        self.current_state = state
 
 
 # Crear instancia de la barra LED
