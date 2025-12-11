@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 import time
 
 # Grove librerías
-from grove.grove_temperature_humidity_sensor import GroveTemperatureHumiditySensor
+from seeed_dht import DHT
 from grove.grove_ultrasonic_ranger import GroveUltrasonicRanger
 from grove.grove_sound_sensor import GroveSoundSensor
 from grove.grove_air_quality_sensor_v1_3 import GroveAirQualitySensorV1_3
@@ -21,14 +21,13 @@ from grove.grove_air_quality_sensor_v1_3 import GroveAirQualitySensorV1_3
 INFLUX_DB = "campusconnect"
 MEASUREMENT = "sensor_data"
 
-# Ajusta estos pines según dónde estén conectados tus sensores en el Base Hat
-# Los números son puertos digitales/analógicos del Grove Base Hat, NO los GPIO puros.
-DHT11_PORT = 26          # temperatura  y humedad
-ULTRASONIC_PORT = 24    # Ejemplo: D16
-SOUND_PORT = 1         # Ejemplo: A0 ó D18 según tu placa (ajústalo si hace falta)
-AIR_QUALITY_PORT = 2    # Ejemplo: A0 (en algunos hats, A0 = 0)
+# PUERTOS GROVE (AJÚSTALOS SI LOS TIENES EN OTROS)
+DHT_TYPE = "11"          # "11" = DHT11, "22" = DHT22
+DHT_PORT = 5             # D5 en el Grove Base Hat
+ULTRASONIC_PORT = 16     # D16
+SOUND_PORT = 18          # D18
+AIR_QUALITY_PORT = 0     # A0
 
-# Ubicación fija (la de tu campus)
 DEFAULT_LAT = 43.2683
 DEFAULT_LON = -2.9469
 
@@ -41,43 +40,32 @@ client.switch_database(INFLUX_DB)
 print(f"✅ Conectado a InfluxDB → DB: {INFLUX_DB}")
 
 # =========================
-# INICIALIZAR SENSORES GROVE
+# INICIALIZAR SENSORES
 # =========================
 print("🔌 Inicializando sensores Grove...")
 
-# Temperatura / Humedad (DHT11)
-temp_hum_sensor = GroveTemperatureHumiditySensor(DHT11_PORT)
-
-# Distancia (Ultrasonic Ranger)
+dht_sensor = DHT(DHT_TYPE, DHT_PORT)
 ultrasonic = GroveUltrasonicRanger(ULTRASONIC_PORT)
-
-# Sonido (Sound Sensor)
 sound_sensor = GroveSoundSensor(SOUND_PORT)
-
-# Calidad del aire (Air Quality Sensor v1.3)
 air_sensor = GroveAirQualitySensorV1_3(AIR_QUALITY_PORT)
 
 print("✅ Sensores Grove inicializados")
 
 # =========================
-# FUNCIÓN: leer sensores reales
+# LECTURA REAL DE SENSORES
 # =========================
 def read_real_sensors():
     # Temperatura y humedad
-    temp, hum = temp_hum_sensor.read()
+    temp, hum = dht_sensor.read()
     if temp is None or hum is None:
-        temp = 0.0
-        hum = 0.0
+        temp, hum = 0.0, 0.0
 
-    # Distancia en cm -> la pasamos a metros para tu app
+    # Distancia (cm → m)
     distance_cm = ultrasonic.get_distance()
     distance_m = round(distance_cm / 100.0, 2)
 
-    # Sonido (valor analógico relativo)
+    # Ruido
     sound_raw = sound_sensor.sound
-
-    # Ruido: mapeamos a Low / Medium / High
-    # Tendrás que ajustar estos umbrales viendo valores reales
     if sound_raw < 100:
         noise_level = "Low"
     elif sound_raw < 300:
@@ -86,7 +74,7 @@ def read_real_sensors():
         noise_level = "High"
 
     # Calidad del aire
-    air_raw = air_sensor.MQ_percentage["SMOKE"]  # valor relativo aproximado
+    air_raw = air_sensor.MQ_percentage["SMOKE"]
     air_quality = int(air_raw)
 
     if air_quality < 100:
@@ -96,7 +84,7 @@ def read_real_sensors():
     else:
         air_status = "Bad"
 
-    # Gente presente (ejemplo: derivado de sonido)
+    # Presencia (ejemplo simple)
     people_present = 1 if sound_raw > 80 else 0
 
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -108,9 +96,9 @@ def read_real_sensors():
         "distance": float(distance_m),
         "noise": int(sound_raw),
         "noise_level": noise_level,
-        "air_quality": int(air_quality),
+        "air_quality": air_quality,
         "air_status": air_status,
-        "people_present": int(people_present),
+        "people_present": people_present,
         "lat": DEFAULT_LAT,
         "lon": DEFAULT_LON,
         "timestamp": now_iso
@@ -145,7 +133,7 @@ def save_to_influx(data):
     print("💾 Guardado en InfluxDB:", data["timestamp"])
 
 # =========================
-# FLASK
+# FLASK API
 # =========================
 app = Flask(__name__)
 CORS(app)
