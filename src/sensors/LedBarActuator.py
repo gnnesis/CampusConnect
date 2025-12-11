@@ -44,15 +44,14 @@ class MY9221:
     # === FUNCIÓN PRINCIPAL: ENCENDER RANGOS ===
     def set_level_by_color(self, state):
         if state == self.current_state:
-            return  # evitar refrescos innecesarios
+            return
 
-        # apagar todo para evitar efectos raros del MY9221
         self.clear_all()
         time.sleep(0.05)
 
         for i in range(10):
-            # Orden invertido: el primer LED que se envía es el LED10
-            led_index = 9 - i  # LED físico
+            # Ahora i=0 -> LED1, i=1 -> LED2 ... i=9 -> LED10
+            led_index = i
 
             if state == "Low":
                 bit_on = led_index >= 2      # LED 3–10
@@ -63,11 +62,11 @@ class MY9221:
             else:
                 bit_on = False
 
-            # encender/apagar LED con 16 bits
             self.send_16bit(0xFFFF if bit_on else 0x0000)
 
         self.latch_data()
         self.current_state = state
+
 
 
 # === INSTANCIA GLOBAL ===

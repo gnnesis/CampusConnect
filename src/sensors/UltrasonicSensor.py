@@ -5,4 +5,4 @@ def distance():
 	return ultrasonic.get_distance()
 
 def arePeople():
-	return distance() < 80
+	return distance() < 8
