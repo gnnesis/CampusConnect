@@ -54,7 +54,7 @@ print("✅ Sensores Grove inicializados")
 # =========================
 def read_real_sensors():
     # Temperatura y humedad
-    temp, hum = dht_sensor.read()
+    hum, temp = dht_sensor.read()
     if temp is None or hum is None:
         temp, hum = 0.0, 0.0
 
