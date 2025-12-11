@@ -47,15 +47,16 @@ class MY9221:
         # Enviar del 1 al 10
         for led_number in range(1, 11):
             if state == "Low":
-                bit_on = led_number < 3       # INVERTIDO: Apagar LED 1 y 2
+                bit_on = led_number < 3       # Apagar LED 1 y 2
             elif state == "Medium":
-                bit_on = led_number < 2       # INVERTIDO: Apagar solo LED 1
+                bit_on = led_number < 2       # Apagar solo LED 1
             elif state == "High":
-                bit_on = False                # INVERTIDO: No apagar ninguno
+                bit_on = False                # No apagar ninguno
             else:
                 bit_on = True                 # Apagar todos
 
-            self.send_16bit(0xFFFF if bit_on else 0x0000)
+            # INVERTIDO: 0x0000 para encender, 0xFFFF para apagar
+            self.send_16bit(0x0000 if bit_on else 0xFFFF)
 
         self.latch_data()
         self.current_state = state
