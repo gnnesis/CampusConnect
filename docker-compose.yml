@@ -10,10 +10,8 @@ services:
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_SECURITY_COOKIE_SAMESITE=none
     volumes:
-      - grafana_old_data:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
     restart: unless-stopped
 
 volumes:
-  grafana_old_data:
-    external: true
-    name: grafana-data
+  grafana_data:
