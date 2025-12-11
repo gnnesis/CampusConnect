@@ -1,7 +1,7 @@
 // ========================
 // CONFIGURACIÓN
 // ========================
-const API_URL = "http://localhost:5001"; // URL del backend
+const API_URL = "http://10.172.117.163:5001"; //url de tu backend
 let currentHeatLayer = null;
 
 // Inicializamos puntos de ejemplo para heatmap

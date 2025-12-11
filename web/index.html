@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="container">
         <header>
             <h1>🎓 CampusConnect</h1>
@@ -88,7 +89,7 @@
                     <div class="sensor-title">👥 Presencia</div>
                     <div class="sensor-value" id="people-value">--</div>
                     <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
-                        Distancia: <span id="distance-value">--</span> cm
+                        Distancia: <span id="distance-value">--</span> m
                     </div>
                 </div>
 
@@ -140,11 +141,14 @@
             <h3>📈 Análisis Histórico (Grafana)</h3>
             <iframe 
                 class="grafana-embed" 
-                src="http://localhost:3000/d/campus-dashboard?orgId=1&refresh=5s&theme=light&kiosk"
+                src="http://10.172.117.163:3000/d/campus-dashboard?orgId=1&refresh=5s&theme=light&kiosk"
                 frameborder="0">
             </iframe>
             <p style="margin-top: 10px; color: #666; text-align: center;">
-                💡 Panel completo disponible en: <a href="http://localhost:3000" target="_blank" style="color: rgb(0,74,148);">Grafana Dashboard</a>
+                💡 Panel completo disponible en: 
+                <a href="http://10.172.117.163:3000" target="_blank" style="color: rgb(0,74,148);">
+                    Grafana Dashboard
+                </a>
             </p>
         </div>
     </div>

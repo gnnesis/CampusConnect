@@ -8,6 +8,7 @@ from flask_cors import CORS
 from influxdb import InfluxDBClient
 from datetime import datetime, timezone
 import time
+import requests
 
 # Sensores Grove
 from seeed_dht import DHT
@@ -145,6 +146,34 @@ def api_sensors():
 @app.route("/api/health", methods=["GET"])
 def api_health():
     return jsonify({"status": "ok", "time": datetime.now(timezone.utc).isoformat()})
+
+
+
+@app.route("/api/weather", methods=["GET"])
+def api_weather():
+    try:
+        API_KEY = "TU_API_KEY_DE_OPENWEATHER"
+        lat = 43.2683
+        lon = -2.9469
+
+        url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric&lang=es"
+        res = requests.get(url).json()
+
+        data = {
+            "temperature": res["main"]["temp"],
+            "temp_max": res["main"]["temp_max"],
+            "temp_min": res["main"]["temp_min"],
+            "humidity": res["main"]["humidity"],
+            "feels_like": res["main"]["feels_like"],
+            "weather_desc": res["weather"][0]["description"],
+            "rain_probability": res.get("rain", {}).get("1h", 0),
+            "wind_speed": res["wind"]["speed"]
+        }
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # =========================
 # MAIN
