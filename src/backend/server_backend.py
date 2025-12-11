@@ -9,11 +9,10 @@ from influxdb import InfluxDBClient
 from datetime import datetime, timezone
 import time
 
-# Grove librerías
+# Sensores Grove
 from seeed_dht import DHT
 from grove.grove_ultrasonic_ranger import GroveUltrasonicRanger
-from grove.grove_sound_sensor import GroveSoundSensor
-from grove.grove_air_quality_sensor_v1_3 import GroveAirQualitySensorV1_3
+from grove.adc import ADC
 
 # =========================
 # CONFIG
@@ -23,10 +22,10 @@ MEASUREMENT = "sensor_data"
 
 # PUERTOS GROVE (AJÚSTALOS SI LOS TIENES EN OTROS)
 DHT_TYPE = "11"          # "11" = DHT11, "22" = DHT22
-DHT_PORT = 5             # D5 en el Grove Base Hat
-ULTRASONIC_PORT = 16     # D16
-SOUND_PORT = 18          # D18
-AIR_QUALITY_PORT = 0     # A0
+DHT_PORT = 5             # D5
+ULTRASONIC_PORT = 24     # D24 (como tú dijiste)
+NOISE_ADC_CHANNEL = 0    # A0
+AIR_ADC_CHANNEL = 1      # A1 (ajusta si está en otro)
 
 DEFAULT_LAT = 43.2683
 DEFAULT_LON = -2.9469
@@ -46,8 +45,7 @@ print("🔌 Inicializando sensores Grove...")
 
 dht_sensor = DHT(DHT_TYPE, DHT_PORT)
 ultrasonic = GroveUltrasonicRanger(ULTRASONIC_PORT)
-sound_sensor = GroveSoundSensor(SOUND_PORT)
-air_sensor = GroveAirQualitySensorV1_3(AIR_QUALITY_PORT)
+adc = ADC()
 
 print("✅ Sensores Grove inicializados")
 
@@ -64,28 +62,28 @@ def read_real_sensors():
     distance_cm = ultrasonic.get_distance()
     distance_m = round(distance_cm / 100.0, 2)
 
-    # Ruido
-    sound_raw = sound_sensor.sound
-    if sound_raw < 100:
+    # Ruido (ADC)
+    noise_raw = adc.read(NOISE_ADC_CHANNEL)
+
+    if noise_raw < 200:
         noise_level = "Low"
-    elif sound_raw < 300:
+    elif noise_raw < 500:
         noise_level = "Medium"
     else:
         noise_level = "High"
 
-    # Calidad del aire
-    air_raw = air_sensor.MQ_percentage["SMOKE"]
-    air_quality = int(air_raw)
+    # Calidad del aire (ADC)
+    air_raw = adc.read(AIR_ADC_CHANNEL)
 
-    if air_quality < 100:
+    if air_raw < 200:
         air_status = "Good"
-    elif air_quality < 300:
+    elif air_raw < 500:
         air_status = "Regular"
     else:
         air_status = "Bad"
 
     # Presencia (ejemplo simple)
-    people_present = 1 if sound_raw > 80 else 0
+    people_present = 1 if noise_raw > 150 else 0
 
     now_iso = datetime.now(timezone.utc).isoformat()
 
@@ -94,9 +92,9 @@ def read_real_sensors():
         "temperature": float(temp),
         "humidity": float(hum),
         "distance": float(distance_m),
-        "noise": int(sound_raw),
+        "noise": int(noise_raw),
         "noise_level": noise_level,
-        "air_quality": air_quality,
+        "air_quality": int(air_raw),
         "air_status": air_status,
         "people_present": people_present,
         "lat": DEFAULT_LAT,
