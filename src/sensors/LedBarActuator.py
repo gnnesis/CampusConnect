@@ -44,19 +44,18 @@ class MY9221:
         self.clear_all()
         time.sleep(0.05)
 
-        # Enviar del 1 al 10
-        for led_number in range(1, 11):
+        # Enviar en ORDEN INVERSO (10 → 1)
+        for led_number in range(10, 0, -1):  # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
             if state == "Low":
-                bit_on = led_number < 3       # Apagar LED 1 y 2
+                bit_on = led_number <= 8      # LEDs 1-8 (que se mapean a 3-10)
             elif state == "Medium":
-                bit_on = led_number < 2       # Apagar solo LED 1
+                bit_on = led_number <= 9      # LEDs 1-9 (que se mapean a 2-10)
             elif state == "High":
-                bit_on = False                # No apagar ninguno
+                bit_on = True                 # Todos
             else:
-                bit_on = True                 # Apagar todos
+                bit_on = False
 
-            # INVERTIDO: 0x0000 para encender, 0xFFFF para apagar
-            self.send_16bit(0x0000 if bit_on else 0xFFFF)
+            self.send_16bit(0xFFFF if bit_on else 0x0000)
 
         self.latch_data()
         self.current_state = state
@@ -67,4 +66,4 @@ ledBar = MY9221(22, 23)
 
 # === FUNCIÓN PÚBLICA PARA LLAMAR DESDE MAIN ===
 def showNoiseLevel(noise_status):
-    ledBar.set_level_by_color(noise_status)
+    ledBar.set_level_by_corner(noise_status)
