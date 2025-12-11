@@ -22,7 +22,7 @@ MEASUREMENT = "sensor_data"
 
 # PUERTOS GROVE (AJÚSTALOS SI LOS TIENES EN OTROS)
 DHT_TYPE = "11"          # "11" = DHT11, "22" = DHT22
-DHT_PORT = 5             # D5
+DHT_PORT = 26             # D5
 ULTRASONIC_PORT = 24     # D24 (como tú dijiste)
 NOISE_ADC_CHANNEL = 4    # A0
 AIR_ADC_CHANNEL =2       # A1 (ajusta si está en otro)
