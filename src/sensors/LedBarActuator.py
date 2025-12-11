@@ -38,20 +38,27 @@ class MY9221:
         self.latch_data()
 
     def set_level_by_color(self, state):
+        """Enciende LEDs según estado:
+           Low:    LEDs 3-10
+           Medium: LEDs 2-10
+           High:   LEDs 1-10
+        """
+
         if state == self.current_state:
             return
 
         self.clear_all()
         time.sleep(0.05)
 
-        # Enviar en ORDEN INVERSO (10 → 1)
-        for led_number in range(10, 0, -1):  # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+        # Recorremos LED10 → LED1 (orden correcto para Grove v2.1)
+        for led_number in range(10, 0, -1):
+
             if state == "Low":
-                bit_on = led_number <= 8      # LEDs 1-8 (que se mapean a 3-10)
+                bit_on = led_number >= 3      # LEDs 3–10
             elif state == "Medium":
-                bit_on = led_number <= 9      # LEDs 1-9 (que se mapean a 2-10)
+                bit_on = led_number >= 2      # LEDs 2–10
             elif state == "High":
-                bit_on = True                 # Todos
+                bit_on = True                 # LEDs 1–10
             else:
                 bit_on = False
 
@@ -64,6 +71,6 @@ class MY9221:
 # === INSTANCIA GLOBAL ===
 ledBar = MY9221(22, 23)
 
-# === FUNCIÓN PÚBLICA PARA LLAMAR DESDE MAIN ===
+# === FUNCIÓN PÚBLICA PARA MAIN ===
 def showNoiseLevel(noise_status):
-    ledBar.set_level_by_corner(noise_status)
+    ledBar.set_level_by_color(noise_status)
