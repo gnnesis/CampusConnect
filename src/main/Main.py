@@ -53,6 +53,9 @@ while True:
 
     current_noise_state = get_noise_state(noise_value, current_noise_state)
 
+    # DEBUG: Imprime los valores
+    print(f"Noise Value: {noise_value}, State: {current_noise_state}")
+    
     showNoiseLevel(current_noise_state)
 
     updateLcd(f"T: {temp:.1f}C", f"H: {hum:.1f}%")
