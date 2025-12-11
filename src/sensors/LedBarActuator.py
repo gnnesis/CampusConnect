@@ -36,29 +36,25 @@ class MY9221:
         self.latch_data()
 
     def set_level_by_color(self, state):
-        """
-        Enciende los LEDs según el estado de ruido:
-        Low: solo verdes (LEDs 3-10)
-        Medium: verdes + amarillo (LEDs 2-10)
-        High: todos (LEDs 1-10)
-        """
         if state == self.current_state:
-            return  # No hacer nada si no cambia
+            return
 
-        # Apagar todos brevemente
         self.clear_all()
-        time.sleep(0.1)
+        time.sleep(0.05)
 
-        # Encender LEDs según el estado
         for i in range(10):
+            # Convertir al índice físico del LED
+            led_index = 9 - i  # MY9221 envía primero LED10
+
             if state == "Low":
-                bit_on = i >= 2  # LEDs 3-10 verdes
+                bit_on = led_index >= 2   # LED 3–10
             elif state == "Medium":
-                bit_on = i >= 1  # LEDs 2-10 amarillo + verdes
+                bit_on = led_index >= 1   # LED 2–10
             elif state == "High":
-                bit_on = True    # Todos
+                bit_on = True             # LED 1–10
             else:
                 bit_on = False
+
             self.send_16bit(bit_on)
 
         self.latch_data()
