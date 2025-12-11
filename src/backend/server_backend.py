@@ -152,7 +152,7 @@ def api_health():
 @app.route("/api/weather", methods=["GET"])
 def api_weather():
     try:
-        API_KEY = "TU_API_KEY_DE_OPENWEATHER"
+        API_KEY = "896495917daa8630f381e00643a2363c"
         lat = 43.2683
         lon = -2.9469
 
