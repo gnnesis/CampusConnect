@@ -14,9 +14,7 @@ class MY9221:
         GPIO.output(self.data_pin, GPIO.LOW)
         GPIO.output(self.clock_pin, GPIO.LOW)
 
-    # === ENVÍA 16 BITS POR LED (CORRECTO PARA MY9221) ===
     def send_16bit(self, value):
-        # Envía 16 bits MSB primero
         for i in range(16):
             bit = (value >> (15 - i)) & 1
             GPIO.output(self.data_pin, GPIO.HIGH if bit else GPIO.LOW)
@@ -25,7 +23,6 @@ class MY9221:
             GPIO.output(self.clock_pin, GPIO.HIGH)
             time.sleep(0.00001)
 
-    # === LATCH (REQUIRED BY MY9221) ===
     def latch_data(self):
         GPIO.output(self.data_pin, GPIO.LOW)
         time.sleep(0.0001)
@@ -35,13 +32,11 @@ class MY9221:
             GPIO.output(self.data_pin, GPIO.LOW)
             time.sleep(0.00001)
 
-    # === APAGAR TODOS ===
     def clear_all(self):
         for _ in range(10):
             self.send_16bit(0x0000)
         self.latch_data()
 
-    # === FUNCIÓN PRINCIPAL: ENCENDER RANGOS ===
     def set_level_by_color(self, state):
         if state == self.current_state:
             return
@@ -49,16 +44,16 @@ class MY9221:
         self.clear_all()
         time.sleep(0.05)
 
-        for i in range(10):
-            # Ahora i=0 -> LED1, i=1 -> LED2 ... i=9 -> LED10
-            led_index = i
+        # CAMBIO CLAVE: Enviar en orden inverso (LED 10 → LED 1)
+        for i in range(9, -1, -1):  # 9, 8, 7, ... 1, 0
+            led_number = i + 1  # LED 10, 9, 8, ... 2, 1
 
             if state == "Low":
-                bit_on = led_index >= 2      # LED 3–10
+                bit_on = led_number >= 3      # LED 3-10 encendidos
             elif state == "Medium":
-                bit_on = led_index >= 1      # LED 2–10
+                bit_on = led_number >= 2      # LED 2-10 encendidos
             elif state == "High":
-                bit_on = True                # LED 1–10
+                bit_on = True                 # LED 1-10 encendidos
             else:
                 bit_on = False
 
@@ -66,7 +61,6 @@ class MY9221:
 
         self.latch_data()
         self.current_state = state
-
 
 
 # === INSTANCIA GLOBAL ===
