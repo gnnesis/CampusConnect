@@ -1,6 +1,14 @@
 import RPi.GPIO as GPIO
 import time
 
+
+for i in range(10):
+    print("Encendiendo solo el LED", i+1)
+    for n in range(10):
+        ledBar.send_16bit(0xFFFF if n == i else 0x0000)
+    ledBar.latch_data()
+    time.sleep(1)
+
 class MY9221:
     def __init__(self, data_pin, clock_pin):
         self.data_pin = data_pin
