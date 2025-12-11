@@ -33,34 +33,34 @@ class MY9221:
             time.sleep(0.00001)
 
     def clear_all(self):
-        for _ in range(5):  # Solo 5 canales reales
+        for _ in range(5):  # 5 canales
             self.send_16bit(0x0000)
         self.latch_data()
 
     def set_level_by_color(self, state):
-
         if state == self.current_state:
             return
 
         self.clear_all()
         time.sleep(0.05)
 
-        # Orden real de tu barra:
-        # Canal 1: LEDs 9–10
-        # Canal 2: LEDs 7–8
-        # Canal 3: LEDs 5–6
-        # Canal 4: LEDs 3–4
-        # Canal 5: LEDs 1–2
+        # Canal 1 = LEDs 1–2
+        # Canal 2 = LEDs 3–4
+        # Canal 3 = LEDs 5–6
+        # Canal 4 = LEDs 7–8
+        # Canal 5 = LEDs 9–10
         #
-        # Por eso recorremos 5→1
+        # Se envía en orden: 5 → 4 → 3 → 2 → 1
 
         for channel in range(5, 0, -1):
-
             if state == "Low":
-                bit_on = channel <= 4  # Enciende desde canal 2→5 => LEDs 3–10
+                # Últimos 4 LEDs → canales 3,4,5
+                bit_on = channel >= 3
             elif state == "Medium":
-                bit_on = channel <= 5  # Enciende todos excepto canal 5? NO → corregido abajo
+                # Siguientes 6 LEDs → canales 2,3,4,5
+                bit_on = channel >= 2
             elif state == "High":
+                # Todos los LEDs
                 bit_on = True
             else:
                 bit_on = False
@@ -71,7 +71,9 @@ class MY9221:
         self.current_state = state
 
 
+# Instancia global
 ledBar = MY9221(22, 23)
 
+# Función pública
 def showNoiseLevel(noise_status):
     ledBar.set_level_by_color(noise_status)
