@@ -36,8 +36,8 @@ class MY9221:
         self.latch_data()
 
     def set_level_by_color(self, state):
-    if state == self.current_state:
-        return
+		if state == self.current_state:
+			return
 
     self.clear_all()
     time.sleep(0.05)
