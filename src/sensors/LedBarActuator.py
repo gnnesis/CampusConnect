@@ -44,16 +44,14 @@ class MY9221:
         self.clear_all()
         time.sleep(0.05)
 
-        # CAMBIO CLAVE: Enviar en orden inverso (LED 10 → LED 1)
-        for i in range(9, -1, -1):  # 9, 8, 7, ... 1, 0
-            led_number = i + 1  # LED 10, 9, 8, ... 2, 1
-
+        # Enviar en orden directo: LED 1, 2, 3, ... 10
+        for led_number in range(1, 11):  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
             if state == "Low":
-                bit_on = led_number >= 3      # LED 3-10 encendidos
+                bit_on = led_number >= 3      # LEDs 3-10 encendidos
             elif state == "Medium":
-                bit_on = led_number >= 2      # LED 2-10 encendidos
+                bit_on = led_number >= 2      # LEDs 2-10 encendidos
             elif state == "High":
-                bit_on = True                 # LED 1-10 encendidos
+                bit_on = True                 # LEDs 1-10 encendidos
             else:
                 bit_on = False
 
