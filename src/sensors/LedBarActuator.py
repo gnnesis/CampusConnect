@@ -34,7 +34,7 @@ class MY9221:
 
     def clear_all(self):
         for _ in range(10):
-            self.send_16bit(0xFFFF)
+            self.send_16bit(0x0000)  # Cambiado a 0x0000 para apagar
         self.latch_data()
 
     def set_level_by_color(self, state):
@@ -44,7 +44,7 @@ class MY9221:
         self.clear_all()
         time.sleep(0.05)
 
-        # CAMBIO: Enviar en orden inverso del 10 al 1
+        # Enviar en orden inverso del 10 al 1
         for led_number in range(10, 0, -1):  # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
             if state == "Low":
                 bit_on = led_number >= 3      # LEDs 3-10 encendidos
@@ -55,7 +55,8 @@ class MY9221:
             else:
                 bit_on = False
 
-            self.send_16bit(0x0000 if bit_on else 0xFFFF)
+            # REVERTIDO: 0xFFFF = encendido, 0x0000 = apagado
+            self.send_16bit(0xFFFF if bit_on else 0x0000)
 
         self.latch_data()
         self.current_state = state
