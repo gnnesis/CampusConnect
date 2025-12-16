@@ -65,29 +65,32 @@ The system monitors environmental and occupancy conditions in real time and prov
 ---
 
 ## Repository Structure
-```text
-/hardware
-  Wiring diagrams and photos
 
-/firmware
-  ESP32 firmware
-  main.cpp       Main application logic
-  config.h       Wi-Fi, MQTT and pin configuration
-  /sensors       Sensor drivers
+- `/hardware`  
+  - Wiring diagrams and photos
 
-/backend
-  MQTT listener
-  InfluxDB writer scripts
+- `/firmware`  
+  - ESP32 firmware  
+  - `main.cpp` → Main application logic  
+  - `config.h` → Wi-Fi, MQTT and pin configuration  
+  - `/sensors` → Sensor drivers
 
-/dashboard
-  Grafana dashboards (JSON files)
+- `/backend`  
+  - MQTT listener  
+  - InfluxDB writer scripts
 
-/docs
-  Reports and presentation slides
-How to Run the Project
-1. Create Python Virtual Environment
-bash
-Copiar código
+- `/dashboard`  
+  - Grafana dashboards (JSON files)
+
+- `/docs`  
+  - Reports and presentation slides
+
+---
+
+## How to Run the Project
+
+### 1. Create Python Virtual Environment
+```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -99,7 +102,7 @@ docker run -d \
   -p 8086:8086 \
   -v influxdb-data:/var/lib/influxdb2 \
   influxdb:2
-Default configuration
+Default configuration:
 
 User: admin
 
@@ -112,18 +115,19 @@ bash
 Copiar código
 cd dashboard
 docker compose up -d
-Grafana credentials
+Grafana credentials:
 
 User: admin
 
 Password: admin123
 
 4. Flash ESP32 Firmware
-text
-Copiar código
-1. Open the firmware folder in Arduino IDE or PlatformIO
-2. Update Wi-Fi and MQTT settings in config.h
-3. Upload the firmware to the ESP32
+Open the /firmware folder in Arduino IDE or PlatformIO
+
+Update Wi-Fi and MQTT settings in config.h
+
+Upload the firmware to the ESP32
+
 5. Run Backend Listener
 bash
 Copiar código
@@ -131,11 +135,12 @@ cd backend
 source ../venv/bin/activate
 python mqtt_listener.py
 6. Load Grafana Dashboard
-text
-Copiar código
-1. Open Grafana in your browser
-2. Import the dashboard JSON from /dashboard
-3. Select InfluxDB as the data source
+Open Grafana in your browser
+
+Import the dashboard JSON from /dashboard
+
+Select InfluxDB as the data source
+
 The dashboard updates in real time.
 
 Project Status
