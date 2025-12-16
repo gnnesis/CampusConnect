@@ -7,19 +7,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # Permitir embeber en iframes
+      # Forzar credenciales iniciales
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=tu_password_nueva_123
+      
+      # Deshabilitar el cambio forzado de contraseña
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      
+      # Para iframes (si lo necesitas)
       - GF_SECURITY_ALLOW_EMBEDDING=true
-      
-      # Cookies sin SameSite (necesario para iframes cross-origin)
       - GF_SECURITY_COOKIE_SAMESITE=none
-      - GF_SECURITY_COOKIE_SECURE=true
-      
-      # IMPORTANTE: Desactivar login anónimo si no lo necesitas
-      - GF_AUTH_ANONYMOUS_ENABLED=false
-      
-      # Configurar para producción con HTTPS
-      - GF_SERVER_ROOT_URL=https://tudominio.com
-      - GF_SERVER_SERVE_FROM_SUB_PATH=false
       
     volumes:
       - grafana_data:/var/lib/grafana
