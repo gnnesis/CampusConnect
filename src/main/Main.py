@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sensors'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'display'))
 
 from TemperatureHumiditySensor import readTemperatureHumidity
-from NoiseSensor import noiseLevel, readNoise
+from NoiseSensor import readNoise
 from AirQualitySensor import airQuality
 from UltrasonicSensor import arePeople
 from LedBarActuator import showNoiseLevel
