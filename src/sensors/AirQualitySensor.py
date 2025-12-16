@@ -1,4 +1,5 @@
 from grove.adc import ADC
+
 adc = ADC()
 
 def readAirQuality():

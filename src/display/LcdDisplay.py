@@ -1,4 +1,5 @@
 from grove.display.jhd1802 import JHD1802
+
 lcd = JHD1802()
 
 def updateLcd(text1, text2):

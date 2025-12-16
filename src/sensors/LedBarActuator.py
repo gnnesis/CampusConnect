@@ -33,7 +33,7 @@ class MY9221:
             time.sleep(0.00001)
 
     def clear_all(self):
-        for _ in range(5):  # 5 canales
+        for _ in range(5):
             self.send_16bit(0x0000)
         self.latch_data()
 
@@ -43,14 +43,6 @@ class MY9221:
 
         self.clear_all()
         time.sleep(0.05)
-
-        # Canal 1 = LEDs 1–2
-        # Canal 2 = LEDs 3–4
-        # Canal 3 = LEDs 5–6
-        # Canal 4 = LEDs 7–8
-        # Canal 5 = LEDs 9–10
-        #
-        # Se envía en orden: 5 → 4 → 3 → 2 → 1
 
         for channel in range(5, 0, -1):
             pysical_channel = 6 - channel
@@ -68,10 +60,7 @@ class MY9221:
         self.latch_data()
         self.current_state = state
 
-
-# Instancia global
 ledBar = MY9221(22, 23)
 
-# Función pública
 def showNoiseLevel(noise_status):
     ledBar.set_level_by_color(noise_status)
