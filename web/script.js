@@ -1,17 +1,12 @@
-// ========================
-// CONFIGURACIÓN
-// ========================
-const API_URL = "http://10.172.117.163:5001"; //url de tu backend
+const API_URL = "http://10.172.117.163:5001";
 let currentHeatLayer = null;
 
-// Inicializamos puntos de ejemplo para heatmap
-// Inicializamos puntos de ejemplo para heatmap (corregido)
 const dataPoints = {
     all: [
         [43.2711, -2.9380, 0.5],
         [43.2708, -2.9382, 0.7],
         [43.2714, -2.9378, 0.3],
-        [43.27133803087678, -2.9377551379742366, 0.5]  // este sería el cuarto pintxo
+        [43.27133803087678, -2.9377551379742366, 0.5]
     ],
     social: [
         [43.2713679879075, -2.938815222975388, 0.6]
@@ -28,11 +23,6 @@ const dataPoints = {
     ]
 };
 
-
-
-// ========================
-// INICIALIZAR MAPA
-// ========================
 const map = L.map('map').setView([43.271123311528505, -2.9380385763615475], 18);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -40,17 +30,13 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// ========================
-// DATOS REALES DE SENSORES
-// ========================
-const SENSOR_API_URL = `${API_URL}/api/sensors`; // tu backend de Flask
+const SENSOR_API_URL = `${API_URL}/api/sensors`;
 
 async function fetchSensorData() {
     try {
         const res = await fetch(SENSOR_API_URL);
         const data = await res.json();
 
-        // Actualizar DOM
         document.getElementById("temp-value").textContent = `${data.temperature.toFixed(1)}°C`;
         document.getElementById("humidity-value").textContent = `${data.humidity.toFixed(1)}%`;
         document.getElementById("noise-value").textContent = data.noise;
@@ -66,9 +52,6 @@ async function fetchSensorData() {
     }
 }
 
-// ========================
-// FUNCIONES DE MAPA Y HEATMAP
-// ========================
 function showHeatmap(category) {
     if (currentHeatLayer) {
         map.removeLayer(currentHeatLayer);
@@ -85,9 +68,9 @@ function showHeatmap(category) {
 
 function addMarkers() {
     const markers = [
-        { pos: [43.27177440959463, -2.9391453516571033], name: '☕ Cafetería Principal', desc: 'Alto tráfico de estudiantes' },
-        { pos: [43.271380049714786, -2.937798139863879], name: '📚 Biblioteca', desc: 'Zona de estudio tranquila' },
-        { pos: [43.271302716504934, -2.9388450675286926], name: '🌳 Zona Verde', desc: 'Área de descanso al aire libre' }
+        { pos: [43.27177440959463, -2.9391453516571033], name: '☕ Cafeteria', desc: 'Alto tráfico de estudiantes' },
+        { pos: [43.271380049714786, -2.937798139863879], name: '📚 Library', desc: 'Zona de estudio tranquila' },
+        { pos: [43.271302716504934, -2.9388450675286926], name: '🌳 Green Zone', desc: 'Área de descanso al aire libre' }
     ];
 
     markers.forEach(marker => {
@@ -97,9 +80,6 @@ function addMarkers() {
     });
 }
 
-// ========================
-// FETCH DATOS CLIMA
-// ========================
 async function fetchWeather() {
     try {
         const res = await fetch(`${API_URL}/api/weather`);
@@ -119,9 +99,6 @@ async function fetchWeather() {
     }
 }
 
-// ========================
-// INICIALIZACIÓN
-// ========================
 document.addEventListener("DOMContentLoaded", () => {
     showHeatmap('all');
     addMarkers();
