@@ -2,20 +2,16 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    user: "472:472"  # Usuario grafana interno
     ports:
       - "3000:3000"
     environment:
-      # Forzar credenciales iniciales
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin123
-      
-      # Deshabilitar cambio forzado de contraseña
-      - GF_USERS_ALLOW_SIGN_UP=false
-      
-      # Para iframes (si lo necesitas)
-      - GF_SECURITY_ALLOW_EMBEDDING=true
-      - GF_SECURITY_COOKIE_SAMESITE=none
-      
+      - GF_PATHS_DATA=/var/lib/grafana
+      - GF_PATHS_LOGS=/var/log/grafana
+      - GF_PATHS_PLUGINS=/var/lib/grafana/plugins
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     volumes:
       - grafana_data:/var/lib/grafana
     restart: unless-stopped
