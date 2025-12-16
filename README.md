@@ -1,21 +1,25 @@
-# CampusConnect – Smart Social Spaces  
-**IoT Challenge 2025–26**
+# CampusConnect – Smart Social Spaces
+
+**IoT Challenge 2025–26**  
+*University of Deusto*
 
 ---
 
 ## Team Members
-- Génesis Balcazar Escobar  
-- Hugo Rey Insausti  
+
+- **Génesis Balcazar Escobar**  
+- **Hugo Rey Insausti**  
 
 ---
 
 ## Project Overview
-CampusConnect is an IoT prototype designed to improve social wellbeing and responsible use of shared campus spaces.  
-The system monitors environmental and occupancy conditions in real time and provides feedback through a public dashboard called **Campus Pulse** and local visual indicators.
+
+CampusConnect is an IoT prototype designed to improve social wellbeing and responsible use of shared campus spaces. The system monitors environmental and occupancy conditions in real time and provides feedback through a public dashboard called **Campus Pulse** and local visual indicators.
 
 ---
 
 ## Project Objectives
+
 - Help students find quiet or available study spaces  
 - Encourage respectful behavior in shared areas  
 - Improve comfort and wellbeing on campus  
@@ -24,6 +28,7 @@ The system monitors environmental and occupancy conditions in real time and prov
 ---
 
 ## What the System Does
+
 - Measures noise level, presence/occupancy, and air quality  
 - Sends sensor data using MQTT  
 - Stores data in InfluxDB  
@@ -33,6 +38,7 @@ The system monitors environmental and occupancy conditions in real time and prov
 ---
 
 ## Sensors Used
+
 | Sensor | Purpose |
 |------|--------|
 | Noise sensor (microphone) | Measure ambient sound level |
@@ -42,7 +48,8 @@ The system monitors environmental and occupancy conditions in real time and prov
 
 ---
 
-## Hardware Connections (ESP32 Example)
+## Hardware Connections (Raspberry Pi / ESP32)
+
 - **Microphone:** Analog input (GPIO 34 / 35 / 36)  
 - **PIR sensor:** Digital input (GPIO 14 / 27)  
 - **Air quality sensor:** I2C (SDA → GPIO 21, SCL → GPIO 22)  
@@ -55,6 +62,7 @@ The system monitors environmental and occupancy conditions in real time and prov
 ---
 
 ## System Workflow
+
 1. Sensors collect environmental and occupancy data  
 2. ESP32 processes the data and publishes it via MQTT  
 3. Backend receives MQTT messages and stores data in InfluxDB  
@@ -66,24 +74,30 @@ The system monitors environmental and occupancy conditions in real time and prov
 
 ## Repository Structure
 
-- `/hardware`  
-  - Wiring diagrams and photos
-
-- `/firmware`  
-  - ESP32 firmware  
-  - `main.cpp` → Main application logic  
-  - `config.h` → Wi-Fi, MQTT and pin configuration  
-  - `/sensors` → Sensor drivers
-
-- `/backend`  
-  - MQTT listener  
-  - InfluxDB writer scripts
-
-- `/dashboard`  
-  - Grafana dashboards (JSON files)
-
-- `/docs`  
-  - Reports and presentation slides
+```
+CampusConnect/
+├── src/
+│   ├── backend/          # Flask REST API and InfluxDB integration
+│   │   ├── api.py        # Main API server
+│   │   └── requirements.txt
+│   ├── main/             # IoT sensor controller
+│   │   └── Main.py
+│   ├── sensors/          # Sensor modules
+│   │   ├── AirQualitySensor.py
+│   │   ├── NoiseSensor.py
+│   │   ├── TemperatureHumiditySensor.py
+│   │   ├── UltrasonicSensor.py
+│   │   └── LedBarActuator.py
+│   ├── display/          # Display controllers
+│   │   └── LcdDisplay.py
+│   └── data/db/          # Database files
+├── web/                  # Web dashboard
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
+├── docs/                 # Documentation
+└── README.md
+```
 
 ---
 
@@ -138,3 +152,55 @@ start index.html
 # URL: http://localhost:3000
 # Import JSON from /dashboard
 # Select InfluxDB as data source
+
+---
+
+## Web Dashboard
+
+The interactive web dashboard (`web/index.html`) provides:
+
+- Real-time heatmap visualization of campus activity
+- Category filters: All Areas, Social, Relax, Food, Study
+- Leaflet.js integration for interactive mapping
+- Responsive design with modern UI
+
+**Location:** University of Deusto, Bilbao (43.2711N, 2.9380W)
+
+---
+
+## Technology Stack
+
+**Backend:**
+- Python 3.8+
+- Flask (REST API)
+- InfluxDB 2.x (Time-series database)
+- CORS support
+
+**Frontend:**
+- HTML5, CSS3, JavaScript
+- Leaflet.js (Interactive maps)
+- Leaflet.heat (Heatmap visualization)
+
+**IoT Hardware:**
+- Raspberry Pi
+- DHT11/DHT22, MQ-135, HC-SR04 sensors
+- I2C LCD Display, LED Bar
+
+---
+
+## License
+
+This project is part of the **IoT Challenge 2025-26** at the University of Deusto.
+
+---
+
+## Contact
+
+For questions or collaboration:
+
+- **Génesis Balcazar Escobar** - [GitHub: @gnnesis](https://github.com/gnnesis)
+- **Hugo Rey Insausti** - [GitHub: @HugoReyIn](https://https://github.com/HugoReyIn)
+
+---
+
+*Built for a better campus experience*
