@@ -1,52 +1,142 @@
-# CampusConnect – Smart Social Spaces (IoT Challenge 2025-26)
+# CampusConnect – Smart Social Spaces  
+**IoT Challenge 2025–26**
 
-**Team Members:**  
+---
+
+## Team Members
 - Génesis Balcazar Escobar  
 - Hugo Rey Insausti  
 
 ---
 
-## Project Summary
-CampusConnect is an IoT prototype designed to foster social cohesion and wellbeing on campus.  
-By monitoring shared spaces through environmental and presence sensors, the system provides feedback
-that promotes respectful behavior, collaborative use of resources, and informed decision-making about
-where to socialize or study.
-
-A public dashboard — the **“Campus Pulse”** — displays real-time status of multiple campus zones based
-on noise, occupancy, and air quality levels. Visual feedback (LEDs or screen indicators) encourages
-positive social interactions and responsible use of campus spaces.
+## Project Overview
+CampusConnect is an IoT prototype designed to improve social wellbeing and responsible use of shared campus spaces.  
+The system monitors environmental and occupancy conditions in real time and provides feedback through a public dashboard called **Campus Pulse** and local visual indicators.
 
 ---
 
-## MVP Scope
-During this course, we aim to develop a functional MVP with:
+## Project Objectives
+- Help students find quiet or available study spaces  
+- Encourage respectful behavior in shared areas  
+- Improve comfort and wellbeing on campus  
+- Provide data for campus space management  
 
-- Monitoring of **2 shared spaces** (e.g., study room + cafeteria area)
-- **3 sensors per space**: noise level, presence/occupancy, and air quality/temperature
-- Microcontroller nodes (ESP32 or Raspberry Pi) with Wi-Fi communication (MQTT)
-- Cloud/local backend with storage (InfluxDB or SQLite)
-- Real-time dashboard using Grafana or ThingsBoard
-- Local visual feedback through a LED strip or small display
+---
+
+## What the System Does
+- Measures noise level, presence/occupancy, and air quality  
+- Sends sensor data using MQTT  
+- Stores data in InfluxDB  
+- Displays real-time data in Grafana dashboards  
+- Provides local visual feedback using an LED strip  
+
+---
+
+## Sensors Used
+| Sensor | Purpose |
+|------|--------|
+| Noise sensor (microphone) | Measure ambient sound level |
+| Presence sensor (PIR / ToF) | Detect occupancy |
+| Air quality / temperature sensor (MQ-135 / DHT22 / BME680) | Measure air quality, temperature, and humidity |
+| LED strip | Provide visual feedback |
+
+---
+
+## Hardware Connections (ESP32 Example)
+- **Microphone:** Analog input (GPIO 34 / 35 / 36)  
+- **PIR sensor:** Digital input (GPIO 14 / 27)  
+- **Air quality sensor:** I2C (SDA → GPIO 21, SCL → GPIO 22)  
+- **LED strip:** Digital output (GPIO 5)  
+
+**Power Supply:**
+- 3.3V for most sensors  
+- 5V for LED strip and some air quality sensors  
+
+---
+
+## System Workflow
+1. Sensors collect environmental and occupancy data  
+2. ESP32 processes the data and publishes it via MQTT  
+3. Backend receives MQTT messages and stores data in InfluxDB  
+4. Grafana reads the database and updates dashboards  
+5. LED strip shows local feedback  
+6. Users consult the Campus Pulse dashboard  
 
 ---
 
 ## Repository Structure
-/hardware → Wiring diagrams, photos, build references
-/firmware → Microcontroller code (ESP32/Arduino)
-/backend → Scripts and services for MQTT, data storage, APIs
-/dashboard → Grafana/ThingsBoard dashboards, captures, exports
-/docs → Written report (PDF), slides, references
-/tests → Logs, test results, experiments
+```text
+/hardware
+  Wiring diagrams and photos
 
+/firmware
+  ESP32 firmware
+  main.cpp       Main application logic
+  config.h       Wi-Fi, MQTT and pin configuration
+  /sensors       Sensor drivers
 
+/backend
+  MQTT listener
+  InfluxDB writer scripts
 
----
+/dashboard
+  Grafana dashboards (JSON files)
 
-## Setup Overview
-1. Flash firmware from `/firmware/` to the ESP32 nodes.
-2. Deploy MQTT broker (Mosquitto recommended).
-3. Run backend listener to store data into a database.
-4. Load `/dashboard/` assets into Grafana or ThingsBoard.
-5. Validate sensor → cloud → dashboard → visual feedback pipeline.
+/docs
+  Reports and presentation slides
+How to Run the Project
+1. Create Python Virtual Environment
+bash
+Copiar código
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+2. Start InfluxDB (Docker)
+bash
+Copiar código
+docker run -d \
+  --name influxdb2 \
+  -p 8086:8086 \
+  -v influxdb-data:/var/lib/influxdb2 \
+  influxdb:2
+Default configuration
 
-Detailed setup instructions will be added as the implementation progresses.
+User: admin
+
+Password: admin123
+
+Bucket: sensors
+
+3. Start Grafana
+bash
+Copiar código
+cd dashboard
+docker compose up -d
+Grafana credentials
+
+User: admin
+
+Password: admin123
+
+4. Flash ESP32 Firmware
+text
+Copiar código
+1. Open the firmware folder in Arduino IDE or PlatformIO
+2. Update Wi-Fi and MQTT settings in config.h
+3. Upload the firmware to the ESP32
+5. Run Backend Listener
+bash
+Copiar código
+cd backend
+source ../venv/bin/activate
+python mqtt_listener.py
+6. Load Grafana Dashboard
+text
+Copiar código
+1. Open Grafana in your browser
+2. Import the dashboard JSON from /dashboard
+3. Select InfluxDB as the data source
+The dashboard updates in real time.
+
+Project Status
+This project is a functional IoT prototype that integrates sensors, data processing, and real-time visualization to improve shared campus spaces.
