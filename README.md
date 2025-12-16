@@ -152,7 +152,7 @@ start index.html
 # URL: http://localhost:3000
 # Import JSON from /dashboard
 # Select InfluxDB as data source
-
+```
 ---
 
 ## Web Dashboard
