@@ -1,8 +1,3 @@
-# ============================================
-#  CAMPUSCONNECT BACKEND REAL + INFLUXDB 1.x
-#  Raspberry Pi + Grove Base Hat
-# ============================================
-
 from flask import Flask, jsonify
 from flask_cors import CORS
 from influxdb import InfluxDBClient
@@ -10,80 +5,61 @@ from datetime import datetime, timezone
 import time
 import requests
 
-# Sensores Grove
 from seeed_dht import DHT
 from grove.grove_ultrasonic_ranger import GroveUltrasonicRanger
 from grove.adc import ADC
 
-# =========================
-# CONFIG
-# =========================
 INFLUX_DB = "campusconnect"
 MEASUREMENT = "sensor_data"
 
-# PUERTOS GROVE (AJÚSTALOS SI LOS TIENES EN OTROS)
-DHT_TYPE = "11"          # "11" = DHT11, "22" = DHT22
-DHT_PORT = 26             # D5
-ULTRASONIC_PORT = 24     # D24 (como tú dijiste)
-NOISE_ADC_CHANNEL = 4    # A0
-AIR_ADC_CHANNEL =2       # A1 (ajusta si está en otro)
+DHT_TYPE = "11"
+DHT_PORT = 26
+ULTRASONIC_PORT = 24
+NOISE_ADC_CHANNEL = 4
+AIR_ADC_CHANNEL =2
 
 DEFAULT_LAT = 43.2683
 DEFAULT_LON = -2.9469
 
-# =========================
-# INFLUXDB
-# =========================
 client = InfluxDBClient(host="localhost", port=8086)
 client.create_database(INFLUX_DB)
 client.switch_database(INFLUX_DB)
-print(f"✅ Conectado a InfluxDB → DB: {INFLUX_DB}")
+print(f"Connected to InfluxDB → DB: {INFLUX_DB}")
 
-# =========================
-# INICIALIZAR SENSORES
-# =========================
-print("🔌 Inicializando sensores Grove...")
+print("Initializing Grove sensors...")
 
 dht_sensor = DHT(DHT_TYPE, DHT_PORT)
 ultrasonic = GroveUltrasonicRanger(ULTRASONIC_PORT)
 adc = ADC()
 
-print("✅ Sensores Grove inicializados")
+print("Grove sensors initialized")
 
-# =========================
-# LECTURA REAL DE SENSORES
-# =========================
 def read_real_sensors():
-    # Temperatura y humedad
     hum, temp = dht_sensor.read()
     if temp is None or hum is None:
         temp, hum = 0.0, 0.0
 
-    # Distancia (cm → m)
     distance_cm = ultrasonic.get_distance()
     distance_m = round(distance_cm / 100.0, 2)
 
-    # Ruido (ADC)
     noise_raw = adc.read(NOISE_ADC_CHANNEL)
 
-    if noise_raw < 200:
+    if noise_raw < 100:
         noise_level = "Low"
-    elif noise_raw < 500:
+    elif noise_raw < 350:
         noise_level = "Medium"
     else:
         noise_level = "High"
 
-    # Calidad del aire (ADC)
     air_raw = adc.read(AIR_ADC_CHANNEL)
 
     if air_raw < 200:
         air_status = "Good"
-    elif air_raw < 500:
+    elif air_raw < 400:
         air_status = "Regular"
     else:
         air_status = "Bad"
 
-    # Presencia (ejemplo simple)
     people_present = 1 if noise_raw > 150 else 0
 
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -105,9 +81,6 @@ def read_real_sensors():
 
     return data
 
-# =========================
-# GUARDAR EN INFLUXDB
-# =========================
 def save_to_influx(data):
     json_body = [{
         "measurement": MEASUREMENT,
@@ -129,11 +102,8 @@ def save_to_influx(data):
         }
     }]
     client.write_points(json_body)
-    print("💾 Guardado en InfluxDB:", data["timestamp"])
+    print("Saved in InfluxDB:", data["timestamp"])
 
-# =========================
-# FLASK API
-# =========================
 app = Flask(__name__)
 CORS(app)
 
@@ -146,8 +116,6 @@ def api_sensors():
 @app.route("/api/health", methods=["GET"])
 def api_health():
     return jsonify({"status": "ok", "time": datetime.now(timezone.utc).isoformat()})
-
-
 
 @app.route("/api/weather", methods=["GET"])
 def api_weather():
@@ -175,9 +143,6 @@ def api_weather():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# =========================
-# MAIN
-# =========================
 if __name__ == "__main__":
-    print("🚀 Iniciando CampusConnect Backend REAL (Grove + InfluxDB)")
+    print("Starting CampusConnect Backend REAL (Grove + InfluxDB)")
     app.run(host="0.0.0.0", port=5001, debug=True)
