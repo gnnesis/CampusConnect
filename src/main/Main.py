@@ -12,8 +12,8 @@ from UltrasonicSensor import arePeople
 from LedBarActuator import showNoiseLevel
 from LcdDisplay import updateLcd
 
-LOW_THRESHOLD = 300
-MEDIUM_THRESHOLD = 350
+LOW_THRESHOLD = 200
+MEDIUM_THRESHOLD = 300
 HYSTERESIS = 10  
 
 current_noise_state = None

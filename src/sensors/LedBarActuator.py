@@ -55,13 +55,10 @@ class MY9221:
         for channel in range(5, 0, -1):
             pysical_channel = 6 - channel
             if state == "Low":
-                # Últimos 4 LEDs → canales 3,4,5
-                bit_on = pysical_channel >= 4
-            elif state == "Medium":
-                # Siguientes 6 LEDs → canales 2,3,4,5
                 bit_on = pysical_channel >= 2
+            elif state == "Medium":
+                bit_on = pysical_channel >= 1
             elif state == "High":
-                # Todos los LEDs
                 bit_on = True
             else:
                 bit_on = False
