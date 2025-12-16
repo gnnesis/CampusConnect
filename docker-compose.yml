@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   grafana:
     image: grafana/grafana:latest
@@ -9,11 +7,10 @@ services:
     environment:
       # Forzar credenciales iniciales
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=tu_password_nueva_123
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
       
-      # Deshabilitar el cambio forzado de contraseña
+      # Deshabilitar cambio forzado de contraseña
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_AUTH_DISABLE_LOGIN_FORM=false
       
       # Para iframes (si lo necesitas)
       - GF_SECURITY_ALLOW_EMBEDDING=true
