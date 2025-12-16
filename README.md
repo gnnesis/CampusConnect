@@ -89,59 +89,52 @@ The system monitors environmental and occupancy conditions in real time and prov
 
 ## How to Run the Project
 
-### 1. Create Python Virtual Environment
+Follow these steps in a **single terminal session** to start all services:
+
 ```bash
+# 1. Create and activate Python virtual environment
 python3 -m venv venv
 source venv/bin/activate
+
+# 2. Install Python dependencies
 pip install -r requirements.txt
-2. Start InfluxDB (Docker)
-bash
-Copiar código
+
+# 3. Start InfluxDB with Docker (persistent volume)
 docker run -d \
   --name influxdb2 \
   -p 8086:8086 \
   -v influxdb-data:/var/lib/influxdb2 \
   influxdb:2
-Default configuration:
 
-User: admin
+# InfluxDB default configuration:
+# User: admin
+# Password: admin123
+# Bucket: sensors
 
-Password: admin123
-
-Bucket: sensors
-
-3. Start Grafana
-bash
-Copiar código
+# 4. Start Grafana using Docker Compose
 cd dashboard
 docker compose up -d
-Grafana credentials:
 
-User: admin
+# Grafana default credentials:
+# User: admin
+# Password: admin123
 
-Password: admin123
+# 5. Go back to the project root
+cd ..
 
-4. Flash ESP32 Firmware
-Open the /firmware folder in Arduino IDE or PlatformIO
+# 6. Run the backend services
+source venv/bin/activate
 
-Update Wi-Fi and MQTT settings in config.h
+# Start main script in the background
+python3 main.py &
 
-Upload the firmware to the ESP32
+# Start backend server
+python3 server_backend.py
 
-5. Run Backend Listener
-bash
-Copiar código
-cd backend
-source ../venv/bin/activate
-python mqtt_listener.py
-6. Load Grafana Dashboard
-Open Grafana in your browser
+# 7. Open the frontend interface
+start index.html
 
-Import the dashboard JSON from /dashboard
-
-Select InfluxDB as the data source
-
-The dashboard updates in real time.
-
-Project Status
-This project is a functional IoT prototype that integrates sensors, data processing, and real-time visualization to improve shared campus spaces.
+# 8. Open Grafana in your browser and import the dashboard
+# URL: http://localhost:3000
+# Import JSON from /dashboard
+# Select InfluxDB as data source
