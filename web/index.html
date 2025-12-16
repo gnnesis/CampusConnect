@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusConnect - Universidad de Deusto</title>
+    <title>CampusConnect - University of Deusto</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     
-    <!-- CSS personalizado -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,7 +16,7 @@
     <div class="container">
         <header>
             <h1>🎓 CampusConnect</h1>
-            <p>Sistema de Monitorización Inteligente - Universidad de Deusto, Bilbao</p>
+            <p>Intelligent Monitoring System - University of Deusto, Bilbao</p>
             
             <div class="weather-bar">
                 <div class="weather-main">
@@ -27,7 +27,7 @@
                             <span class="temp-max">↑ <span id="temp-max">--°</span></span> / 
                             <span class="temp-min">↓ <span id="temp-min">--°</span></span>
                         </div>
-                        <div style="font-size: 0.95em; margin-top: 5px; opacity: 0.95;" id="weather-desc-main">Cargando...</div>
+                        <div style="font-size: 0.95em; margin-top: 5px; opacity: 0.95;" id="weather-desc-main">Loading...</div>
                     </div>
                 </div>
 
@@ -35,25 +35,25 @@
                     <div class="weather-item rain-probability">
                         <div class="weather-item-icon">🌧️</div>
                         <div class="weather-item-value" id="rain-prob">--%</div>
-                        <div class="weather-item-label">Prob. Lluvia</div>
+                        <div class="weather-item-label">Rain Probability</div>
                     </div>
 
                     <div class="weather-item">
                         <div class="weather-item-icon">💧</div>
                         <div class="weather-item-value" id="humidity-ext">--%</div>
-                        <div class="weather-item-label">Humedad</div>
+                        <div class="weather-item-label">Humidity</div>
                     </div>
 
                     <div class="weather-item">
                         <div class="weather-item-icon">💨</div>
                         <div class="weather-item-value" id="wind-speed">--</div>
-                        <div class="weather-item-label">Viento (m/s)</div>
+                        <div class="weather-item-label">Wind (m/s)</div>
                     </div>
 
                     <div class="weather-item">
                         <div class="weather-item-icon">🌡️</div>
                         <div class="weather-item-value" id="feels-like">--°</div>
-                        <div class="weather-item-label">Sensación</div>
+                        <div class="weather-item-label">Feels Like</div>
                     </div>
                 </div>
             </div>
@@ -61,91 +61,91 @@
 
         <div class="main-content">
             <aside class="sidebar">
-                <h3>📊 Sensores en Tiempo Real</h3>
+                <h3>📊 Real-Time Sensors</h3>
                 
                 <div class="sensor-card">
-                    <div class="sensor-title">🌡️ Temperatura</div>
+                    <div class="sensor-title">🌡️ Temperature</div>
                     <div class="sensor-value" id="temp-value">--°C</div>
                 </div>
 
                 <div class="sensor-card">
-                    <div class="sensor-title">💧 Humedad</div>
+                    <div class="sensor-title">💧 Humidity</div>
                     <div class="sensor-value" id="humidity-value">--%</div>
                 </div>
 
                 <div class="sensor-card">
-                    <div class="sensor-title">🔊 Nivel de Ruido</div>
+                    <div class="sensor-title">🔊 Noise Level</div>
                     <div class="sensor-value" id="noise-value">--</div>
                     <span class="sensor-status" id="noise-status">--</span>
                 </div>
 
                 <div class="sensor-card">
-                    <div class="sensor-title">🌫️ Calidad del Aire</div>
+                    <div class="sensor-title">🌫️ Air Quality</div>
                     <div class="sensor-value" id="air-value">--</div>
                     <span class="sensor-status" id="air-status">--</span>
                 </div>
 
                 <div class="sensor-card">
-                    <div class="sensor-title">👥 Presencia</div>
+                    <div class="sensor-title">👥 Presence</div>
                     <div class="sensor-value" id="people-value">--</div>
                     <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
-                        Distancia: <span id="distance-value">--</span> m
+                        Distance: <span id="distance-value">--</span> m
                     </div>
                 </div>
 
                 <div class="last-update" id="sensor-update">
-                    Actualizando...
+                    Updating...
                 </div>
 
                 <div id="stats">
-                    <p><strong>Categoría:</strong> Todas las áreas</p>
-                    <p><strong>Puntos activos:</strong> -- sensores</p>
-                    <p><strong>Intensidad promedio:</strong> --%</p>
-                    <p><strong>Última actualización:</strong> --</p>
+                    <p><strong>Category:</strong> All areas</p>
+                    <p><strong>Active points:</strong> -- sensors</p>
+                    <p><strong>Average intensity:</strong> --%</p>
+                    <p><strong>Last update:</strong> --</p>
                 </div>
             </aside>
 
             <div class="map-container">
                 <div class="controls">
-                    <h3>🔍 Filtros de Visualización</h3>
+                    <h3>🔍 Display Filters</h3>
                     <div class="button-group">
-                        <button class="filter-btn active" data-filter="all">📍 Todas las áreas</button>
-                        <button class="filter-btn" data-filter="social">👥 Zonas sociales</button>
-                        <button class="filter-btn" data-filter="relax">🌳 Áreas de relajación</button>
-                        <button class="filter-btn" data-filter="food">🍽️ Puntos de comida</button>
-                        <button class="filter-btn" data-filter="study">📚 Espacios de estudio</button>
+                        <button class="filter-btn active" data-filter="all">📍 All areas</button>
+                        <button class="filter-btn" data-filter="social">👥 Social zones</button>
+                        <button class="filter-btn" data-filter="relax">🌳 Relaxation areas</button>
+                        <button class="filter-btn" data-filter="food">🍽️ Food points</button>
+                        <button class="filter-btn" data-filter="study">📚 Study spaces</button>
                     </div>
                 </div>
 
                 <div id="map"></div>
 
                 <div class="legend">
-                    <h4>📊 Leyenda de Intensidad</h4>
+                    <h4>📊 Intensity Legend</h4>
                     <div class="legend-item">
                         <div class="color-box" style="background: linear-gradient(to right, blue, cyan);"></div>
-                        <span>Baja actividad (0-30%) - Zona tranquila</span>
+                        <span>Low activity (0-30%) - Quiet zone</span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background: linear-gradient(to right, lime, yellow);"></div>
-                        <span>Actividad media (30-70%) - Uso moderado</span>
+                        <span>Medium activity (30-70%) - Moderate use</span>
                     </div>
                     <div class="legend-item">
                         <div class="color-box" style="background: linear-gradient(to right, yellow, red);"></div>
-                        <span>Alta actividad (70-100%) - Zona congestionada</span>
+                        <span>High activity (70-100%) - Congested zone</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="grafana-section">
-            <h3>📈 Análisis Histórico (Grafana)</h3>
+            <h3>📈 Historical Analysis (Grafana)</h3>
             <iframe 
                 class="grafana-embed" 
                 src="http://10.172.117.163:3000/dashboard/new?orgId=1&from=2025-12-11T07:48:55.328Z&to=2025-12-11T13:48:55.328Z&timezone=browser&viewPanel=panel-3"
                 frameborder="0">
             </iframe>
             <p style="margin-top: 10px; color: #666; text-align: center;">
-                💡 Panel completo disponible en: 
+                💡 Full panel available at: 
                 <a href="http://10.172.117.163:3000" target="_blank" style="color: rgb(0,74,148);">
                     Grafana Dashboard
                 </a>
@@ -157,7 +157,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     
-    <!-- JS personalizado -->
+    <!-- Custom JS -->
     <script src="script.js"></script>
 </body>
 </html>
