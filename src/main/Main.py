@@ -44,17 +44,19 @@ def get_noise_state(value, current_state):
         else:
             return "High"
 
+try:
+    while True:
+        temp, hum = readTemperatureHumidity()
+        noise_value = readNoise()
+        air_status = airQuality()
+        people = arePeople()
 
-while True:
-    temp, hum = readTemperatureHumidity()
-    noise_value = readNoise()
-    air_status = airQuality()
-    people = arePeople()
+        current_noise_state = get_noise_state(noise_value, current_noise_state)
+        
+        showNoiseLevel(current_noise_state)
+        updateLcd(f"T: {temp:.1f}C", f"H: {hum:.1f}%")
 
-    current_noise_state = get_noise_state(noise_value, current_noise_state)
-    
-    showNoiseLevel(current_noise_state)
+        time.sleep(5)
 
-    updateLcd(f"T: {temp:.1f}C", f"H: {hum:.1f}%")
-
-    time.sleep(5)
+except KeyboardInterrupt:
+    print("\nProgram stopped by user")
